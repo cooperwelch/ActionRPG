@@ -493,6 +493,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2007051155282077090, guid: 26125b106c77d43c480c11669cdd1a8d, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2007051155282077090, guid: 26125b106c77d43c480c11669cdd1a8d, type: 3}
+      propertyPath: conversation
+      value: Intro Town Shopkeeper
+      objectReference: {fileID: 0}
+    - target: {fileID: 2007051155282077090, guid: 26125b106c77d43c480c11669cdd1a8d, type: 3}
+      propertyPath: conversationActor
+      value: 
+      objectReference: {fileID: 1820489316}
     - target: {fileID: 4662881866573930423, guid: 26125b106c77d43c480c11669cdd1a8d, type: 3}
       propertyPath: m_SortingOrder
       value: 2
