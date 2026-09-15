@@ -6,8 +6,8 @@ using UnityEngine.UI;
 
 public class CraftingUIController : MonoBehaviour
 {
-    public static bool IsOpen { get; private set; }
-    public static int LastClosedFrame { get; private set; } = -1;
+    public static bool IsOpen => GameplayUI.IsCraftingOpen;
+    public static int LastClosedFrame => GameplayUI.LastClosedFrame;
 
     [SerializeField] private CraftingRecipeCatalog recipeCatalog;
     [SerializeField] private GameObject panelRoot;
@@ -15,11 +15,16 @@ public class CraftingUIController : MonoBehaviour
     [SerializeField] private Transform recipeListContainer;
     [SerializeField] private CraftingUIRecipeRow recipeRowPrefab;
     [SerializeField] private CraftingUIDoneButton doneButton;
+    [SerializeField] private Image menuCursor;
+    [SerializeField] private GameObject messagePanel;
+    [SerializeField] private TMP_Text messageText;
+    [SerializeField] private float cursorOffsetFromOptionLeft = 6f;
 
     private readonly List<CraftingUIRecipeRow> recipeRows = new List<CraftingUIRecipeRow>();
     private readonly List<CraftingRecipe> activeRecipes = new List<CraftingRecipe>();
-    private PlayerMovement playerMovement;
     private int selectedIndex;
+    private bool messageOpen;
+    private Vector2 cursorSize = new Vector2(8f, 8f);
     private float axisInputDelayDuration = 0.25f;
     private bool acceptingAxisInputUp = true;
     private bool acceptingAxisInputDown = true;
@@ -28,55 +33,65 @@ public class CraftingUIController : MonoBehaviour
 
     private void Awake()
     {
-        playerMovement = FindObjectOfType<PlayerMovement>();
+        if (menuCursor != null && menuCursor.rectTransform.sizeDelta.x > 0f)
+        {
+            cursorSize = menuCursor.rectTransform.sizeDelta;
+        }
+
         CloseImmediate();
     }
 
     public void Open()
     {
         PlayerStats.Initialize();
-        PopulateRecipes();
         selectedIndex = 0;
+        CloseMessageImmediate();
         // Ignore held Up from opening the bench until the axis is released.
         acceptingAxisInputUp = false;
         acceptingAxisInputDown = false;
-        hammerLevelText.text = $"LVL{PlayerStats.CraftingHammerLevel}";
-        panelRoot.SetActive(true);
-        IsOpen = true;
-
-        if (playerMovement != null)
+        if (hammerLevelText != null)
         {
-            playerMovement.StopForDialogue();
+            hammerLevelText.text = $"LVL{PlayerStats.CraftingHammerLevel}";
         }
 
+        panelRoot.SetActive(true);
+        PopulateRecipes();
+        GameplayUI.IsCraftingOpen = true;
+        GameplayUI.FreezePlayer();
+        Canvas.ForceUpdateCanvases();
+        RebuildRecipeListLayout();
         RefreshSelection();
     }
 
     public void Close()
     {
+        CloseMessageImmediate();
         panelRoot.SetActive(false);
-        LastClosedFrame = Time.frameCount;
-        IsOpen = false;
-
-        if (playerMovement != null)
-        {
-            playerMovement.canMove = true;
-        }
+        GameplayUI.IsCraftingOpen = false;
+        GameplayUI.NotifyClosed();
+        GameplayUI.UnfreezePlayer();
     }
 
     private void CloseImmediate()
     {
+        CloseMessageImmediate();
         if (panelRoot != null)
         {
             panelRoot.SetActive(false);
         }
 
-        IsOpen = false;
+        GameplayUI.IsCraftingOpen = false;
     }
 
     private void Update()
     {
         if (!IsOpen) return;
+
+        if (messageOpen)
+        {
+            HandleMessageDialog();
+            return;
+        }
 
         HandleNavigation();
         HandleConfirm();
@@ -88,6 +103,7 @@ public class CraftingUIController : MonoBehaviour
         {
             if (row != null)
             {
+                row.gameObject.SetActive(false);
                 Destroy(row.gameObject);
             }
         }
@@ -104,7 +120,7 @@ public class CraftingUIController : MonoBehaviour
             activeRecipes.Add(recipe);
         }
 
-        LayoutRebuilder.ForceRebuildLayoutImmediate(recipeListContainer as RectTransform);
+        RebuildRecipeListLayout();
     }
 
     private void HandleNavigation()
@@ -146,7 +162,7 @@ public class CraftingUIController : MonoBehaviour
 
     private void HandleConfirm()
     {
-        if (!Input.GetButtonDown("Fire1") && !Input.GetKeyDown(KeyCode.Space) && !Input.GetKeyDown(KeyCode.Return))
+        if (!GameplayUI.ConfirmPressed())
         {
             return;
         }
@@ -158,14 +174,55 @@ public class CraftingUIController : MonoBehaviour
         }
 
         CraftingRecipe recipe = activeRecipes[selectedIndex];
-        if (!recipe.CanCraft())
+        string blockedMessage = recipe.GetBlockedCraftMessage();
+        if (!string.IsNullOrEmpty(blockedMessage))
         {
+            ShowMessage(blockedMessage);
             return;
         }
 
         if (recipe.Execute())
         {
             RefreshSelection();
+        }
+    }
+
+    private void HandleMessageDialog()
+    {
+        if (GameplayUI.ConfirmPressed())
+        {
+            CloseMessage();
+        }
+    }
+
+    private void ShowMessage(string message)
+    {
+        messageOpen = true;
+        if (messageText != null)
+        {
+            messageText.text = message;
+        }
+
+        if (messagePanel != null)
+        {
+            messagePanel.SetActive(true);
+        }
+
+        PositionCursor();
+    }
+
+    private void CloseMessage()
+    {
+        CloseMessageImmediate();
+        RefreshSelection();
+    }
+
+    private void CloseMessageImmediate()
+    {
+        messageOpen = false;
+        if (messagePanel != null)
+        {
+            messagePanel.SetActive(false);
         }
     }
 
@@ -176,12 +233,57 @@ public class CraftingUIController : MonoBehaviour
             recipeRows[i].RefreshState(activeRecipes[i], i == selectedIndex);
         }
 
-        doneButton.SetSelected(IsDoneSelected());
+        if (doneButton != null)
+        {
+            doneButton.SetSelected(IsDoneSelected());
+        }
+
+        PositionCursor();
+    }
+
+    private void PositionCursor()
+    {
+        if (menuCursor == null)
+        {
+            return;
+        }
+
+        menuCursor.enabled = !messageOpen;
+        if (messageOpen)
+        {
+            return;
+        }
+
+        RebuildRecipeListLayout();
+        UIMenuCursor.PositionLeftOf(menuCursor, SelectedOptionRect(), cursorOffsetFromOptionLeft, cursorSize);
+    }
+
+    private RectTransform SelectedOptionRect()
+    {
+        if (IsDoneSelected())
+        {
+            return doneButton != null ? doneButton.transform as RectTransform : null;
+        }
+
+        if (selectedIndex < 0 || selectedIndex >= recipeRows.Count || recipeRows[selectedIndex] == null)
+        {
+            return null;
+        }
+
+        return recipeRows[selectedIndex].RectTransform;
     }
 
     private bool IsDoneSelected()
     {
         return selectedIndex >= recipeRows.Count;
+    }
+
+    private void RebuildRecipeListLayout()
+    {
+        if (recipeListContainer is RectTransform listRect && listRect.gameObject.activeInHierarchy)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(listRect);
+        }
     }
 
     private IEnumerator DelayAxisInputDown()

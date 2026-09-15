@@ -18,7 +18,7 @@ public class TooltipInteraction : MonoBehaviour
 
     void Update()
     {
-        if (isInTrigger && UpPressed() && DialogueManager.IsConversationActive == false)
+        if (isInTrigger && UpPressed() && DialogueManager.IsConversationActive == false && !GameplayUI.IsBlocking)
         {
             // Get the dialogue trigger component from this gameObject
             DialogueSystemTrigger dialogueTrigger = this.GetComponent<DialogueSystemTrigger>();
@@ -26,7 +26,7 @@ public class TooltipInteraction : MonoBehaviour
             if (dialogueTrigger != null)
             {
                 StopAllCoroutines();
-                tooltipSpriteRenderer.color = new Color(tooltipSpriteRenderer.color.r, tooltipSpriteRenderer.color.g, tooltipSpriteRenderer.color.b, 0);
+                HideTooltipImmediate();
                 dialogueTrigger.OnUse(transform);
             }
         }
@@ -39,6 +39,11 @@ public class TooltipInteraction : MonoBehaviour
         if (other.CompareTag("OverworldHero") || other.CompareTag("Hero") || other.CompareTag("Player"))
         {
             isInTrigger = true;
+            if (!isActiveAndEnabled)
+            {
+                return;
+            }
+
             StopAllCoroutines();
             StartCoroutine(ShowTooltip());
         }
@@ -50,9 +55,30 @@ public class TooltipInteraction : MonoBehaviour
         if (other.CompareTag("OverworldHero") || other.CompareTag("Hero") || other.CompareTag("Player"))
         {
             isInTrigger = false;
+            if (!isActiveAndEnabled)
+            {
+                HideTooltipImmediate();
+                return;
+            }
+
             StopAllCoroutines();
             StartCoroutine(HideTooltip());
         }
+    }
+
+    private void HideTooltipImmediate()
+    {
+        if (tooltipSpriteRenderer == null)
+        {
+            return;
+        }
+
+        tooltipSpriteRenderer.color = new Color(
+            tooltipSpriteRenderer.color.r,
+            tooltipSpriteRenderer.color.g,
+            tooltipSpriteRenderer.color.b,
+            0
+        );
     }
 
     private bool UpPressed()

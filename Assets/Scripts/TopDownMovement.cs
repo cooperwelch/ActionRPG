@@ -11,6 +11,8 @@ public class TopDownMovement : MonoBehaviour
     private Vector2 movement;
     private bool endAnimationOverride = false;
 
+    public bool CanMove => !stopMovement && !endAnimationOverride;
+
     private void Awake()
     {
         // Set position to last encounter

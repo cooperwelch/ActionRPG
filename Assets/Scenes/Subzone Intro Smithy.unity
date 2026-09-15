@@ -15013,6 +15013,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: -20
       objectReference: {fileID: 0}
+    - target: {fileID: 88528, guid: d7ef947b56703b3428009724724c06a6, type: 3}
+      propertyPath: cursorOffsetFromOptionLeft
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 5890830485515130, guid: d7ef947b56703b3428009724724c06a6, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1

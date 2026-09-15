@@ -33,7 +33,7 @@ public class SecondaryWeaponController : MonoBehaviour
         if (_cooldownTimer > 0f)
             _cooldownTimer -= Time.deltaTime;
 
-        if (Input.GetKeyDown(KeyCode.T) && weapons.Count > 0 && !CraftingUIController.IsOpen)
+        if (Input.GetKeyDown(KeyCode.T) && weapons.Count > 0 && !GameplayUI.IsBlocking)
         {
             EquipNextAvailableWeapon();
         }

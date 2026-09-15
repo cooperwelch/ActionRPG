@@ -18,7 +18,9 @@ MonoBehaviour:
   lockedIcon: {fileID: 21300000, guid: 58e1acded6e58460cbb28953820e5779, type: 3}
   hammerLevelRequired: 1
   oreCost: 4
-  unavailableLabel: '-'
+  unavailableMessage: This crafting item is not yet available.
+  unaffordableMessage: Not enough ore.
+  maxAmmoMessage: Already at max capacity.
   requirements:
   - type: 0
     secondaryWeapon: {fileID: 11400000, guid: cf53c3036300a4c0288a41fd91864b3a, type: 2}

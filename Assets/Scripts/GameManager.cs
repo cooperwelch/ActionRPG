@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour
     private GameObject _gameOverScreen;
     private bool _isPaused = false;
     private bool _isGameOver = false;
+    public bool IsPaused => _isPaused;
+    public bool IsGameOver => _isGameOver;
     private string _continueLevelName;
 
     private void Awake()
@@ -33,7 +35,10 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Cancel") && !_isGameOver)
+        if (Input.GetButtonDown("Cancel")
+            && !_isGameOver
+            && !GameplayUI.IsBlocking
+            && Time.frameCount > GameplayUI.LastClosedFrame)
         {
             _pauseScreen.SetActive(!_isPaused);
             _isPaused = _pauseScreen.activeInHierarchy;

@@ -54,7 +54,7 @@ public class LevelExit : MonoBehaviour
             return;
         }
 
-        if (!UpPressed() || DialogueManager.IsConversationActive || CraftingUIController.IsOpen)
+        if (!UpPressed() || DialogueManager.IsConversationActive || GameplayUI.IsBlocking)
         {
             return;
         }
@@ -94,6 +94,12 @@ public class LevelExit : MonoBehaviour
         }
 
         playerInRange = null;
+        if (!isActiveAndEnabled)
+        {
+            HideTooltipImmediate();
+            return;
+        }
+
         StopAllCoroutines();
         StartCoroutine(HideTooltip());
     }

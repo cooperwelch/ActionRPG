@@ -82,7 +82,7 @@ public class Attack : MonoBehaviour, IDamageable
 		meleeWeaponController.isCrouching = playerMovement.isCrouching;
 
 		// Handle melee attack
-		if (meleeWeaponController.HasWeapon && playerMovement.canMove && !CraftingUIController.IsOpen && Input.GetButtonDown("Fire1") && canMeleeAttack && Time.frameCount > lastDialogueEndFrame && Time.frameCount > CraftingUIController.LastClosedFrame)
+		if (meleeWeaponController.HasWeapon && playerMovement.canMove && !GameplayUI.IsBlocking && Input.GetButtonDown("Fire1") && canMeleeAttack && Time.frameCount > lastDialogueEndFrame && Time.frameCount > GameplayUI.LastClosedFrame)
 		{
 			if (playerMovement.grounded)
 			{
@@ -100,7 +100,7 @@ public class Attack : MonoBehaviour, IDamageable
 		}
 
 		// Handle secondary weapon attack
-		if (secondaryWeaponController.HasWeapon && secondaryWeaponController.CanAttack && playerMovement.canMove && !CraftingUIController.IsOpen && Input.GetButtonDown("Fire2") && canMeleeAttack && Time.frameCount > lastDialogueEndFrame && Time.frameCount > CraftingUIController.LastClosedFrame)
+		if (secondaryWeaponController.HasWeapon && secondaryWeaponController.CanAttack && playerMovement.canMove && !GameplayUI.IsBlocking && Input.GetButtonDown("Fire2") && canMeleeAttack && Time.frameCount > lastDialogueEndFrame && Time.frameCount > GameplayUI.LastClosedFrame)
 		{
 			if (playerMovement.grounded)
 			{

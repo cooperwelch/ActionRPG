@@ -17,15 +17,26 @@ public class SubzoneHUD : MonoBehaviour
     [SerializeField] private Image secondaryItemFrame;
     [SerializeField] private Color ammoNormalColor = Color.white;
     [SerializeField] private Color ammoEmptyColor = new Color(0.5f, 0.5f, 0.5f, 1f);
+    [SerializeField] private GameObject hudChrome;
+    [SerializeField] private bool hudVisibleWithMenuOnly;
 
     private SecondaryWeaponController _secondaryWeaponController;
+
+    private void Awake()
+    {
+        ApplyHudChromeVisibility(false);
+        if (hudVisibleWithMenuOnly && bossHealthMeter != null)
+        {
+            bossHealthMeter.gameObject.SetActive(false);
+        }
+    }
 
     private void Start()
     {
         _secondaryWeaponController = FindObjectOfType<SecondaryWeaponController>();
 
         MeleeController meleeController = FindObjectOfType<MeleeController>();
-        if (meleeController != null && meleeController.HasWeapon)
+        if (meleeController != null && meleeController.HasWeapon && meleeController.currentMeleeWeapon != null)
         {
             SetItemFrameImage(meleeController.currentMeleeWeapon.itemFrameImage);
         }
@@ -41,9 +52,18 @@ public class SubzoneHUD : MonoBehaviour
 
         UpdateStatTexts();
 
-        attackValueText.ForceMeshUpdate();
-        defenseValueText.ForceMeshUpdate();
-        ammoValueText.ForceMeshUpdate();
+        if (attackValueText != null)
+        {
+            attackValueText.ForceMeshUpdate();
+        }
+        if (defenseValueText != null)
+        {
+            defenseValueText.ForceMeshUpdate();
+        }
+        if (ammoValueText != null)
+        {
+            ammoValueText.ForceMeshUpdate();
+        }
         if (oreValueText != null)
         {
             oreValueText.ForceMeshUpdate();
@@ -52,9 +72,18 @@ public class SubzoneHUD : MonoBehaviour
         {
             denariusValueText.ForceMeshUpdate();
         }
-        LayoutRebuilder.ForceRebuildLayoutImmediate(attackValueText.transform.parent as RectTransform);
-        LayoutRebuilder.ForceRebuildLayoutImmediate(defenseValueText.transform.parent as RectTransform);
-        LayoutRebuilder.ForceRebuildLayoutImmediate(ammoValueText.transform.parent as RectTransform);
+        if (attackValueText != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(attackValueText.transform.parent as RectTransform);
+        }
+        if (defenseValueText != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(defenseValueText.transform.parent as RectTransform);
+        }
+        if (ammoValueText != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(ammoValueText.transform.parent as RectTransform);
+        }
         if (oreValueText != null)
         {
             LayoutRebuilder.ForceRebuildLayoutImmediate(oreValueText.transform.parent as RectTransform);
@@ -72,16 +101,23 @@ public class SubzoneHUD : MonoBehaviour
 
     private void UpdateStatTexts()
     {
-        attackValueText.text = PlayerStats.Attack.ToString();
-        defenseValueText.text = PlayerStats.Defense.ToString();
+        if (attackValueText != null)
+        {
+            attackValueText.text = PlayerStats.Attack.ToString();
+        }
+        if (defenseValueText != null)
+        {
+            defenseValueText.text = PlayerStats.Defense.ToString();
+        }
 
-        string ammoText = GetSecondaryWeaponAmmoText();
-        ammoValueText.text = ammoText;
-
-        bool isEmpty = _secondaryWeaponController == null
-            || !_secondaryWeaponController.HasWeapon
-            || _secondaryWeaponController.CurrentAmmo <= 0;
-        ammoValueText.color = isEmpty ? ammoEmptyColor : ammoNormalColor;
+        if (ammoValueText != null)
+        {
+            ammoValueText.text = GetSecondaryWeaponAmmoText();
+            bool isEmpty = _secondaryWeaponController == null
+                || !_secondaryWeaponController.HasWeapon
+                || _secondaryWeaponController.CurrentAmmo <= 0;
+            ammoValueText.color = isEmpty ? ammoEmptyColor : ammoNormalColor;
+        }
 
         if (oreValueText != null)
         {
@@ -105,33 +141,78 @@ public class SubzoneHUD : MonoBehaviour
     }
     public void FillBossHealthMeter()
     {
-        bossHealthMeter.FillMeter();
+        if (bossHealthMeter != null)
+        {
+            bossHealthMeter.FillMeter();
+        }
     }
 
     public void FillPlayerHealthMeter()
     {
-        playerHealthMeter.FillMeter();
+        if (playerHealthMeter != null)
+        {
+            playerHealthMeter.FillMeter();
+        }
     }
 
     public void ReducePlayerHealthMeter(int amount)
     {
-        playerHealthMeter.Decrement(amount);
+        if (playerHealthMeter != null)
+        {
+            playerHealthMeter.Decrement(amount);
+        }
+    }
+
+    public void IncreasePlayerHealthMeter(int amount)
+    {
+        if (playerHealthMeter != null && amount > 0)
+        {
+            playerHealthMeter.Increment(amount);
+        }
     }
 
     public void ReduceBossHealthMeter(int amount)
     {
-        bossHealthMeter.Decrement(amount);
+        if (bossHealthMeter != null)
+        {
+            bossHealthMeter.Decrement(amount);
+        }
+    }
+
+    public void SetHudVisibleForMenu(bool menuOpen)
+    {
+        ApplyHudChromeVisibility(menuOpen);
     }
 
     public void SetItemFrameImage(Sprite image)
     {
+        if (itemFrame == null)
+        {
+            return;
+        }
+
         itemFrame.sprite = image;
         itemFrame.color = image != null ? Color.white : Color.clear;
     }
 
     public void SetSecondaryItemFrameImage(Sprite image)
     {
+        if (secondaryItemFrame == null)
+        {
+            return;
+        }
+
         secondaryItemFrame.sprite = image;
         secondaryItemFrame.color = image != null ? Color.white : Color.clear;
+    }
+
+    private void ApplyHudChromeVisibility(bool menuOpen)
+    {
+        if (hudChrome == null)
+        {
+            return;
+        }
+
+        hudChrome.SetActive(!hudVisibleWithMenuOnly || menuOpen);
     }
 }

@@ -15,6 +15,9 @@ public static class PlayerStats
     public static bool HasCraftingHammer { get; private set; }
     public static int CraftingHammerLevel { get; private set; }
     public static bool IsCyclopsDefeated { get; private set; }
+    public const int DefaultInventoryCapacity = 4;
+    public static int InventoryCapacity { get; private set; }
+    public static List<ItemDefinition> Inventory { get; private set; }
 
     private static Dictionary<string, int> SecondaryWeaponAmmo;
 
@@ -49,9 +52,12 @@ public static class PlayerStats
             SecondaryWeapon = null;
             SecondaryWeaponAmmo = new Dictionary<string, int>();
             //Ore = 99;
+            Denarius = 25;
             HasCraftingHammer = false;
             CraftingHammerLevel = 1;
             IsCyclopsDefeated = false;
+            InventoryCapacity = DefaultInventoryCapacity;
+            Inventory = CreateEmptyInventory(InventoryCapacity);
         }
     }
 
@@ -94,6 +100,130 @@ public static class PlayerStats
         }
 
         Denarius += amount;
+    }
+
+    public static bool SpendDenarius(int amount)
+    {
+        Initialize();
+        if (amount <= 0 || Denarius < amount)
+        {
+            return false;
+        }
+
+        Denarius -= amount;
+        return true;
+    }
+
+    public static bool HasEmptySlot()
+    {
+        Initialize();
+        EnsureInventory();
+        for (int i = 0; i < InventoryCapacity; i++)
+        {
+            if (Inventory[i] == null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static bool TryAddItem(ItemDefinition item)
+    {
+        Initialize();
+        EnsureInventory();
+        if (item == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < InventoryCapacity; i++)
+        {
+            if (Inventory[i] == null)
+            {
+                Inventory[i] = item;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static ItemDefinition GetItemAt(int index)
+    {
+        Initialize();
+        EnsureInventory();
+        if (index < 0 || index >= InventoryCapacity)
+        {
+            return null;
+        }
+
+        return Inventory[index];
+    }
+
+    public static bool RemoveAt(int index)
+    {
+        Initialize();
+        EnsureInventory();
+        if (index < 0 || index >= InventoryCapacity || Inventory[index] == null)
+        {
+            return false;
+        }
+
+        Inventory[index] = null;
+        CompactInventory();
+        return true;
+    }
+
+    public static int Heal(int amount)
+    {
+        Initialize();
+        if (amount <= 0)
+        {
+            return 0;
+        }
+
+        int before = Health;
+        Health = Mathf.Min(HealthCapacity, Health + amount);
+        return Health - before;
+    }
+
+    private static List<ItemDefinition> CreateEmptyInventory(int capacity)
+    {
+        List<ItemDefinition> slots = new List<ItemDefinition>(capacity);
+        for (int i = 0; i < capacity; i++)
+        {
+            slots.Add(null);
+        }
+
+        return slots;
+    }
+
+    private static void EnsureInventory()
+    {
+        if (Inventory == null || Inventory.Count != InventoryCapacity)
+        {
+            Inventory = CreateEmptyInventory(InventoryCapacity > 0 ? InventoryCapacity : DefaultInventoryCapacity);
+            InventoryCapacity = Inventory.Count;
+        }
+    }
+
+    private static void CompactInventory()
+    {
+        List<ItemDefinition> occupied = new List<ItemDefinition>();
+        for (int i = 0; i < InventoryCapacity; i++)
+        {
+            if (Inventory[i] != null)
+            {
+                occupied.Add(Inventory[i]);
+            }
+        }
+
+        for (int i = 0; i < InventoryCapacity; i++)
+        {
+            Inventory[i] = i < occupied.Count ? occupied[i] : null;
+        }
     }
 
     public static void MarkForOverworldDestroy(string id)

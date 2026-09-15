@@ -46,7 +46,7 @@ public class TreasureChest : MonoBehaviour
 
     private void Update()
     {
-        if (!isOpen && playerInRange != null && UpPressed() && !DialogueManager.IsConversationActive)
+        if (!isOpen && playerInRange != null && UpPressed() && !DialogueManager.IsConversationActive && !GameplayUI.IsBlocking)
         {
             TryOpen(playerInRange);
         }

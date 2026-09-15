@@ -28,7 +28,12 @@ public class CraftingRecipe : ScriptableObject
     public Sprite lockedIcon;
     public int hammerLevelRequired = 1;
     public int oreCost;
-    public string unavailableLabel = "UNAVAILABLE";
+    [TextArea]
+    public string unavailableMessage = "This recipe is unavailable.";
+    [TextArea]
+    public string unaffordableMessage = "Not enough ore.";
+    [TextArea]
+    public string maxAmmoMessage = "Already at max ammo.";
     public List<CraftRequirement> requirements = new List<CraftRequirement>();
     public CraftEffectType effectType = CraftEffectType.AddSecondaryWeaponAmmo;
     public SecondaryWeapon targetSecondaryWeapon;
@@ -69,6 +74,26 @@ public class CraftingRecipe : ScriptableObject
     public bool CanCraft()
     {
         return MeetsRequirements() && CanAfford() && !IsAtMaxAmmo();
+    }
+
+    public string GetBlockedCraftMessage()
+    {
+        if (!MeetsRequirements())
+        {
+            return unavailableMessage;
+        }
+
+        if (!CanAfford())
+        {
+            return unaffordableMessage;
+        }
+
+        if (IsAtMaxAmmo())
+        {
+            return maxAmmoMessage;
+        }
+
+        return string.Empty;
     }
 
     public bool Execute()

@@ -24,7 +24,7 @@ public class CraftingBench : MonoBehaviour
 
     private void Update()
     {
-        if (playerInRange == null || CraftingUIController.IsOpen) return;
+        if (playerInRange == null || GameplayUI.IsBlocking) return;
 
         if (UpPressed() && !DialogueManager.IsConversationActive)
         {
@@ -52,7 +52,7 @@ public class CraftingBench : MonoBehaviour
 
     public void TryInteract(Transform player)
     {
-        if (DialogueManager.IsConversationActive || CraftingUIController.IsOpen) return;
+        if (DialogueManager.IsConversationActive || GameplayUI.IsBlocking) return;
 
         StopAllCoroutines();
         if (tooltipSpriteRenderer != null)

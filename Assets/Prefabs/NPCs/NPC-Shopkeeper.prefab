@@ -124,6 +124,7 @@ GameObject:
   - component: {fileID: 2534916719330886352}
   - component: {fileID: 859973174565019120}
   - component: {fileID: 859973174565019121}
+  - component: {fileID: 859973174565019122}
   m_Layer: 0
   m_Name: NPC-Shopkeeper
   m_TagString: NPC-OldManBoatGuy
@@ -488,3 +489,16 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &859973174565019122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8860285419709452480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f3a6c8e2b1d4a75b9c4e7d0a2f58316, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  catalog: {fileID: 11400000, guid: 9a4c1e7d3b5f4820a6d8c2e0f1b34567, type: 2}
