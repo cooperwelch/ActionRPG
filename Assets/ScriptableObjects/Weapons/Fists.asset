@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a61e057b40d682e4085f29d1c3922058, type: 3}
   m_Name: Fists
   m_EditorClassIdentifier: 
+  displayName: Fists
   attackPoint: {x: 1.0315, y: 0.3739}
   crouchAttackPoint: {x: 1.035, y: -0.379}
   attackBounds: {x: 0.4412692, y: 0.3782791}

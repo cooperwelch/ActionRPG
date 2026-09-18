@@ -6,7 +6,6 @@ public class ThrowingAxe : SecondaryWeapon
     public GameObject projectilePrefab;
     public float throwSpeed = 15f;
     public float launchAngle = 35f;
-    public int damage = 2;
     public Vector2 spawnOffset = new Vector2(0.5f, 0f);
     public float crouchYOffset = -0.5f;
 
@@ -23,7 +22,7 @@ public class ThrowingAxe : SecondaryWeapon
         );
 
         projectile.GetComponent<Projectile>().Initialize(
-            damage,
+            attackDamage,
             velocity,
             canDamageEnemies,
             canMineOre,

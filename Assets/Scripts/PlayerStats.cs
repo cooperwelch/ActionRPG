@@ -8,6 +8,7 @@ public static class PlayerStats
     public static int Health { get; private set; }
     public static int HealthCapacity { get; private set; }
     public static string MeleeWeapon { get; private set; }
+    public static List<string> MeleeWeapons { get; private set; }
     public static string SecondaryWeapon { get; private set; }
     public static List<string> SecondaryWeapons { get; private set; }
     public static int Ore { get; private set; }
@@ -42,7 +43,8 @@ public static class PlayerStats
             PowerupDestroy = new List<string>();
             OpenedTreasureChests = new List<string>();
             OverworldDestroyList = new List<string>();
-            // Default unarmed primary — persists across scenes until a real weapon is picked up
+            // Default unarmed primary — persists across scenes; Fists always acquired
+            MeleeWeapons = new List<string> { MeleeController.UnarmedWeaponName };
             MeleeWeapon = MeleeController.UnarmedWeaponName;
             Attack = 1;
             SecondaryWeapons = new List<string>();
@@ -288,17 +290,67 @@ public static class PlayerStats
 
     public static void PickUpWeapon(string weaponSOPath, int attack)
     {
+        Initialize();
+        EnsureMeleeWeapons();
         Debug.Log("PickUpWeapon: " + weaponSOPath);
-        MeleeWeapon = weaponSOPath;
+        if (!string.IsNullOrEmpty(weaponSOPath) && !MeleeWeapons.Contains(weaponSOPath))
+        {
+            MeleeWeapons.Add(weaponSOPath);
+        }
+
+        EquipMeleeWeapon(weaponSOPath, attack);
+    }
+
+    public static void EquipMeleeWeapon(string weaponName, int attack)
+    {
+        Initialize();
+        EnsureMeleeWeapons();
+        if (string.IsNullOrEmpty(weaponName))
+        {
+            return;
+        }
+
+        if (!MeleeWeapons.Contains(weaponName))
+        {
+            MeleeWeapons.Add(weaponName);
+        }
+
+        Debug.Log("EquipMeleeWeapon: " + weaponName);
+        MeleeWeapon = weaponName;
         Attack = attack;
     }
 
     public static void ClearMeleeWeapon()
     {
         Initialize();
+        EnsureMeleeWeapons();
         // Persist unarmed primary (Fists) rather than a null equip state
+        if (!MeleeWeapons.Contains(MeleeController.UnarmedWeaponName))
+        {
+            MeleeWeapons.Insert(0, MeleeController.UnarmedWeaponName);
+        }
+
         MeleeWeapon = MeleeController.UnarmedWeaponName;
         Attack = 1;
+    }
+
+    private static void EnsureMeleeWeapons()
+    {
+        if (MeleeWeapons == null)
+        {
+            MeleeWeapons = new List<string>();
+        }
+
+        if (!MeleeWeapons.Contains(MeleeController.UnarmedWeaponName))
+        {
+            MeleeWeapons.Insert(0, MeleeController.UnarmedWeaponName);
+        }
+    }
+
+    public static void EnsureMeleeWeaponsList()
+    {
+        Initialize();
+        EnsureMeleeWeapons();
     }
 
     public static void AcquireSecondaryWeapon(string weaponName)

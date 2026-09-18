@@ -10,17 +10,24 @@ public class MainMenuUIController : MonoBehaviour
         Main,
         Mode,
         Use,
-        Drop
+        Drop,
+        Equipment
     }
+
+    private const int MainOptionItems = 0;
+    private const int MainOptionEquipment = 1;
+    private const int MainOptionQuit = 3;
 
     [SerializeField] private GameObject panelRoot;
     [SerializeField] private GameObject modePanel;
     [SerializeField] private GameObject inventoryPanel;
+    [SerializeField] private GameObject equipmentPanel;
     [SerializeField] private List<MainMenuOptionRow> mainOptions = new List<MainMenuOptionRow>();
     [SerializeField] private List<MainMenuOptionRow> modeOptions = new List<MainMenuOptionRow>();
     [SerializeField] private Image mainCursor;
     [SerializeField] private Image modeCursor;
     [SerializeField] private InventoryUIController inventoryUI;
+    [SerializeField] private EquipmentUIController equipmentUI;
     [SerializeField] private float cursorOffsetFromOptionLeft = 6f;
 
     private UIListNavigator navigator;
@@ -28,6 +35,8 @@ public class MainMenuUIController : MonoBehaviour
     private int mainIndex;
     private int modeIndex;
     private int inventoryIndex;
+    private int equipmentRow;
+    private int equipmentColumn;
     private SubzoneHUD subzoneHUD;
     private Vector2 cursorSize = new Vector2(8f, 8f);
 
@@ -84,7 +93,8 @@ public class MainMenuUIController : MonoBehaviour
     {
         PlayerStats.Initialize();
         panelRoot.SetActive(true);
-        SetSecondaryVisible(false);
+        SetItemsVisible(false);
+        SetEquipmentVisible(false);
         Canvas.ForceUpdateCanvases();
         RebuildLayout(LayoutRootOf(mainOptions));
         state = MenuState.Main;
@@ -118,7 +128,8 @@ public class MainMenuUIController : MonoBehaviour
             panelRoot.SetActive(false);
         }
 
-        SetSecondaryVisible(false);
+        SetItemsVisible(false);
+        SetEquipmentVisible(false);
         state = MenuState.Closed;
         GameplayUI.IsMainMenuOpen = false;
     }
@@ -147,6 +158,40 @@ public class MainMenuUIController : MonoBehaviour
                     inventoryUI.Refresh(inventoryIndex, true);
                 }
                 break;
+            case MenuState.Equipment:
+                HandleEquipmentNavigation();
+                break;
+        }
+    }
+
+    private void HandleEquipmentNavigation()
+    {
+        if (equipmentUI == null)
+        {
+            return;
+        }
+
+        bool changed = false;
+
+        navigator.SetIndex(equipmentColumn);
+        if (navigator.TickHorizontal(EquipmentUIController.SlotsPerRow))
+        {
+            equipmentColumn = navigator.Index;
+            changed = true;
+        }
+
+        navigator.SetIndex(equipmentRow);
+        if (navigator.TickVertical(EquipmentUIController.RowCount))
+        {
+            equipmentRow = navigator.Index;
+            changed = true;
+        }
+
+        navigator.SetIndex(equipmentColumn);
+
+        if (changed)
+        {
+            equipmentUI.Refresh(equipmentRow, equipmentColumn, true);
         }
     }
 
@@ -160,7 +205,18 @@ public class MainMenuUIController : MonoBehaviour
                     return;
                 }
 
-                OpenItems();
+                if (mainIndex == MainOptionItems)
+                {
+                    OpenItems();
+                }
+                else if (mainIndex == MainOptionEquipment)
+                {
+                    OpenEquipment();
+                }
+                else if (mainIndex == MainOptionQuit)
+                {
+                    Close();
+                }
                 break;
             case MenuState.Mode:
                 if (modeIndex < 0 || modeIndex >= modeOptions.Count || !modeOptions[modeIndex].IsEnabled)
@@ -188,6 +244,13 @@ public class MainMenuUIController : MonoBehaviour
                     inventoryUI.Refresh(inventoryIndex, true);
                 }
                 break;
+            case MenuState.Equipment:
+                if (equipmentUI != null)
+                {
+                    equipmentUI.TryEquipFocused(equipmentRow, equipmentColumn);
+                    equipmentUI.Refresh(equipmentRow, equipmentColumn, true);
+                }
+                break;
         }
     }
 
@@ -199,7 +262,7 @@ public class MainMenuUIController : MonoBehaviour
                 Close();
                 break;
             case MenuState.Mode:
-                SetSecondaryVisible(false);
+                SetItemsVisible(false);
                 state = MenuState.Main;
                 navigator.Prepare(mainIndex, false);
                 RefreshMain(false);
@@ -216,12 +279,19 @@ public class MainMenuUIController : MonoBehaviour
                 RebuildLayout(LayoutRootOf(modeOptions));
                 RefreshMode();
                 break;
+            case MenuState.Equipment:
+                SetEquipmentVisible(false);
+                state = MenuState.Main;
+                navigator.Prepare(mainIndex, false);
+                RefreshMain(false);
+                break;
         }
     }
 
     private void OpenItems()
     {
-        SetSecondaryVisible(true);
+        SetEquipmentVisible(false);
+        SetItemsVisible(true);
         modeIndex = FirstEnabledIndex(modeOptions);
         state = MenuState.Mode;
         navigator.Prepare(modeIndex);
@@ -236,7 +306,23 @@ public class MainMenuUIController : MonoBehaviour
         RefreshMode();
     }
 
-    private void SetSecondaryVisible(bool visible)
+    private void OpenEquipment()
+    {
+        SetItemsVisible(false);
+        SetEquipmentVisible(true);
+        equipmentRow = EquipmentUIController.PrimaryRow;
+        equipmentColumn = 0;
+        state = MenuState.Equipment;
+        navigator.Prepare(equipmentColumn);
+        RefreshMain(true);
+        Canvas.ForceUpdateCanvases();
+        if (equipmentUI != null)
+        {
+            equipmentUI.Refresh(equipmentRow, equipmentColumn, true);
+        }
+    }
+
+    private void SetItemsVisible(bool visible)
     {
         if (modePanel != null)
         {
@@ -252,6 +338,20 @@ public class MainMenuUIController : MonoBehaviour
         if (!visible && inventoryUI != null)
         {
             inventoryUI.Refresh(-1, false);
+        }
+    }
+
+    private void SetEquipmentVisible(bool visible)
+    {
+        if (equipmentPanel != null)
+        {
+            equipmentPanel.SetActive(visible);
+        }
+
+        if (!visible && equipmentUI != null)
+        {
+            equipmentUI.HideDescription();
+            equipmentUI.Refresh(0, 0, false);
         }
     }
 

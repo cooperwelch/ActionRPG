@@ -54,12 +54,28 @@ public class SecondaryWeaponController : MonoBehaviour
         EquipWeapon(weapon);
     }
 
-    private void EquipWeapon(SecondaryWeapon weapon)
+    public void EquipWeapon(SecondaryWeapon weapon)
     {
+        if (weapon == null) return;
         currentWeapon = weapon;
         PlayerStats.EquipSecondaryWeapon(weapon.name);
         _currentWeaponIndex = PlayerStats.SecondaryWeapons.IndexOf(weapon.name);
-        FindObjectOfType<SubzoneHUD>().SetSecondaryItemFrameImage(weapon.itemFrameImage);
+        SubzoneHUD hud = FindObjectOfType<SubzoneHUD>();
+        if (hud != null)
+        {
+            hud.SetSecondaryItemFrameImage(weapon.itemFrameImage);
+        }
+    }
+
+    public bool TryGetWeapon(string weaponName, out SecondaryWeapon weapon)
+    {
+        weapon = null;
+        if (string.IsNullOrEmpty(weaponName) || _weaponMap == null)
+        {
+            return false;
+        }
+
+        return _weaponMap.TryGetValue(weaponName, out weapon) && weapon != null;
     }
 
     private void InitializeWeaponMap()

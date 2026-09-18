@@ -12,17 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1c9b65bdfa4542d49a031c32f0bd98b, type: 3}
   m_Name: Dolabra
   m_EditorClassIdentifier: 
+  displayName: Dolabra
   itemFrameImage: {fileID: 21300000, guid: baf4b1376768443789564b08592e3fea, type: 3}
   cooldown: 0.5
   attackAnimationDuration: 0.4
   attackAnimationTrigger: IsThrowing
   maxAmmo: 10
+  attackDamage: 2
   canDamageEnemies: 1
   canMineOre: 1
   canBreakBreakables: 1
   projectilePrefab: {fileID: 8844091647254525655, guid: 64b17a100f0bb4e7699a64cc253b8d2b, type: 3}
   throwSpeed: 14
   launchAngle: 75
-  damage: 2
   spawnOffset: {x: 0.25, y: 0.5}
   crouchYOffset: -0.4

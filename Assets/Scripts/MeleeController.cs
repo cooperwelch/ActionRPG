@@ -173,6 +173,27 @@ public class MeleeController : MonoBehaviour
     }
 
     /// <summary>
+    /// Equips an already-acquired primary weapon (or acquires it if missing). Used by the equipment menu.
+    /// </summary>
+    public void EquipMeleeWeapon(MeleeWeapon weapon)
+    {
+        if (weapon == null) return;
+        PlayerStats.EquipMeleeWeapon(weapon.name, weapon.attackDamage);
+        SetMeleeWeapon(weapon);
+    }
+
+    public bool TryGetWeapon(string weaponName, out MeleeWeapon weapon)
+    {
+        weapon = null;
+        if (string.IsNullOrEmpty(weaponName) || WeaponScriptableObjectMap == null)
+        {
+            return false;
+        }
+
+        return WeaponScriptableObjectMap.TryGetValue(weaponName, out weapon) && weapon != null;
+    }
+
+    /// <summary>
     /// Unequips the current primary and equips Fists, persisting that choice across scenes.
     /// </summary>
     public void ClearMeleeWeapon()

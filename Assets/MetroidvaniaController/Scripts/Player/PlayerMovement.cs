@@ -156,9 +156,21 @@ public class PlayerMovement : MonoBehaviour
 
     public void AllowMovementAfterAttackOrKnockback()
     {
-        if (stopOverrideAttack) return;
 		// Attack cooldown must not re-enable Move() during knockback (damps the arc).
 		if (isDamaged) return;
+
+		// Knockback finished, but something else still owns control (cyclops death Stop,
+		// or menu/shop/crafting). Kill residual slide velocity without restoring input.
+		if (stopOverrideAttack || GameplayUI.IsBlocking)
+		{
+			GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+			// Menu/shop freeze: match StopForDialogue (Move(0) still runs).
+			// Hard Stop() freeze (cyclops death): keep StopFixedUpdate true.
+			if (!stopOverrideAttack)
+				StopFixedUpdate = false;
+			return;
+		}
+
         AllowMovement();
     }
 
@@ -194,6 +206,7 @@ public class PlayerMovement : MonoBehaviour
         animator.SetBool("IsJumping", false);
 		animator.SetFloat("Speed", 0f);
 		attack.ClearAttackAnimation();
+		GetComponent<Rigidbody2D>().velocity = Vector2.zero;
 	}
 
 	public void FreezeWalking()

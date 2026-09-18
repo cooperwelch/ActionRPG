@@ -228,6 +228,8 @@ public class Attack : MonoBehaviour, IDamageable
 		{
             animator.SetBool("IsHit", false);
             isDamaged = false;
+			// Clear leftover knockback velocity before control restore / freeze handoff.
+			rigidBody.velocity = Vector2.zero;
             playerMovement.AllowMovementAfterAttackOrKnockback();
             canMeleeAttack = true;
 

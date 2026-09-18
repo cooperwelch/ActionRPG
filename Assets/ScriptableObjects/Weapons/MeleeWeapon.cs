@@ -3,6 +3,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "MeleeWeapon", menuName = "ScriptableObjects/Weapon/Melee")]
 public class MeleeWeapon : ScriptableObject
 {
+    public string displayName;
     public Vector2 attackPoint;
     public Vector2 crouchAttackPoint;
     public Vector2 attackBounds;

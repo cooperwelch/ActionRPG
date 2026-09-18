@@ -12,17 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d088d1803588f4965b95cf1cd5826631, type: 3}
   m_Name: Plumbata
   m_EditorClassIdentifier: 
+  displayName: Plumbata
   itemFrameImage: {fileID: 21300000, guid: 47214d9b982ae4020abd852f56d4c5a6, type: 3}
   cooldown: 0.5
   attackAnimationDuration: 0.4
   attackAnimationTrigger: IsThrowing
   maxAmmo: 10
+  attackDamage: 1
   canDamageEnemies: 1
   canMineOre: 0
   canBreakBreakables: 1
   projectilePrefab: {fileID: 8844091647254525655, guid: a75125ea3d7d94409b9f75e1ff4a6e2d, type: 3}
   throwSpeed: 17
   launchAngle: 6
-  damage: 1
   spawnOffset: {x: 0.25, y: 0.25}
   crouchYOffset: -0.4

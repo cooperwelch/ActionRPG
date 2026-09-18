@@ -6,7 +6,6 @@ public class Plumbata : SecondaryWeapon
     public GameObject projectilePrefab;
     public float throwSpeed = 25f;
     public float launchAngle = 7f;
-    public int damage = 1;
     public Vector2 spawnOffset = new Vector2(0.5f, 0f);
     public float crouchYOffset = -0.5f;
 
@@ -23,7 +22,7 @@ public class Plumbata : SecondaryWeapon
         );
 
         projectile.GetComponent<Projectile>().Initialize(
-            damage,
+            attackDamage,
             velocity,
             canDamageEnemies,
             canMineOre,

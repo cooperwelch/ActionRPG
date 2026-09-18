@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a61e057b40d682e4085f29d1c3922058, type: 3}
   m_Name: Spatha
   m_EditorClassIdentifier: 
+  displayName: Spatha
   attackPoint: {x: 1.3, y: 0.3}
   crouchAttackPoint: {x: 1.3, y: -0.4}
   attackBounds: {x: 1.2, y: 0.5}

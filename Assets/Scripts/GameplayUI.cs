@@ -86,7 +86,7 @@ public static class GameplayUI
         PlayerMovement playerMovement = Object.FindObjectOfType<PlayerMovement>();
         if (playerMovement != null)
         {
-            playerMovement.canMove = true;
+            playerMovement.AllowMovement();
             return;
         }
 
