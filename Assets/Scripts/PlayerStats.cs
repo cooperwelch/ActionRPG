@@ -48,9 +48,6 @@ public static class PlayerStats
             MeleeWeapon = MeleeController.UnarmedWeaponName;
             Attack = 1;
             SecondaryWeapons = new List<string>();
-            //SecondaryWeapons.Add("ThrowingAxe");
-            //SecondaryWeapons.Add("Plumbata");
-            //SecondaryWeapon = "ThrowingAxe";
             SecondaryWeapon = null;
             SecondaryWeaponAmmo = new Dictionary<string, int>();
             //Ore = 99;
@@ -422,6 +419,12 @@ public static class PlayerStats
             newHealth = 0;
         }
         Health = newHealth;
+    }
+
+    public static void SetHealth(int amount)
+    {
+        Initialize();
+        Health = Mathf.Clamp(amount, 0, HealthCapacity);
     }
 
     public static void Reset()

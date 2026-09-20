@@ -24,6 +24,10 @@ public class IntroWreckedShipDialogue : MonoBehaviour
             TargetVirtualCameraOnPlayer();
             fader.doSteppedFade = true;
         }
+        else
+        {
+            PlayerStats.SetHealth(3);
+        }
     }
 
     void Start()

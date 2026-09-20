@@ -1,7 +1,7 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "ThrowingAxe", menuName = "ScriptableObjects/Weapon/Secondary/ThrowingAxe")]
-public class ThrowingAxe : SecondaryWeapon
+[CreateAssetMenu(fileName = "ThrowingAxe", menuName = "ScriptableObjects/Weapon/Secondary/Dolabra")]
+public class Dolabra : SecondaryWeapon
 {
     public GameObject projectilePrefab;
     public float throwSpeed = 15f;
