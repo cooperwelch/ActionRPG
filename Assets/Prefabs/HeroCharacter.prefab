@@ -44,9 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da301d539c4a34ba7b367c2ad29338fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weapons:
-  - {fileID: 11400000, guid: cf53c3036300a4c0288a41fd91864b3a, type: 2}
-  - {fileID: 11400000, guid: 27cde59cb3f0b4102b8c7d115d345b8b, type: 2}
+  weaponCatalog: {fileID: 11400000, guid: b8e2c4d6f0a14e7b9c3d5f7a1b2e4068, type: 2}
 --- !u!1 &444172796820223396
 GameObject:
   m_ObjectHideFlags: 0
@@ -10292,10 +10290,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   audioManager: {fileID: 0}
-  weapons:
-  - {fileID: 11400000, guid: 736183553da42ce4c912eef09fefb92f, type: 2}
-  - {fileID: 11400000, guid: 4c8e9a1b2d3f4051a6b7c8d9e0f1a2b3, type: 2}
-  - {fileID: 11400000, guid: c7d8e9f0a1b24354c6d7e8f9a0b1c2d3, type: 2}
+  weaponCatalog: {fileID: 11400000, guid: b8e2c4d6f0a14e7b9c3d5f7a1b2e4068, type: 2}
   forceEquipOnStart: {fileID: 0}
   stripMeleeOnStart: 0
   playerDirection: 0

@@ -11,10 +11,9 @@ public class MeleeController : MonoBehaviour
     public enum PlayerDirection { Left, Right };
     public MeleeWeapon currentMeleeWeapon { get; private set; }
     [SerializeField] private SubzoneAudioManager audioManager;
-    [SerializeField] private List<MeleeWeapon> weapons;
+    [SerializeField] private WeaponCatalog weaponCatalog;
     [SerializeField] private MeleeWeapon forceEquipOnStart;
     [SerializeField] private bool stripMeleeOnStart;
-    private Dictionary<string, MeleeWeapon> WeaponScriptableObjectMap;
     [HideInInspector] public PlayerDirection playerDirection;
     [HideInInspector] public bool isCrouching = false;
     public bool HasWeapon
@@ -31,8 +30,8 @@ public class MeleeController : MonoBehaviour
     {
         get
         {
-            if (WeaponScriptableObjectMap != null
-                && WeaponScriptableObjectMap.TryGetValue(UnarmedWeaponName, out MeleeWeapon fists)
+            if (weaponCatalog != null
+                && weaponCatalog.TryGetMelee(UnarmedWeaponName, out MeleeWeapon fists)
                 && fists != null)
             {
                 return fists;
@@ -46,7 +45,10 @@ public class MeleeController : MonoBehaviour
         // TODO: Elliott remove this
         PlayerStats.Initialize();
 
-        InitializeWeaponMap();
+        if (weaponCatalog == null)
+        {
+            Debug.LogWarning("MeleeController: Weapon Catalog is not assigned.");
+        }
 
         LoadLastObtainedWeapon();
 
@@ -73,7 +75,8 @@ public class MeleeController : MonoBehaviour
     private void LoadLastObtainedWeapon()
     {
         if (PlayerStats.MeleeWeapon != null
-            && WeaponScriptableObjectMap.TryGetValue(PlayerStats.MeleeWeapon, out MeleeWeapon weapon)
+            && weaponCatalog != null
+            && weaponCatalog.TryGetMelee(PlayerStats.MeleeWeapon, out MeleeWeapon weapon)
             && weapon != null)
         {
             SetMeleeWeapon(weapon);
@@ -82,16 +85,6 @@ public class MeleeController : MonoBehaviour
 
         // No valid equipped primary (or first run) — fall back to Fists and persist
         EquipUnarmed();
-    }
-
-    private void InitializeWeaponMap()
-    {
-        WeaponScriptableObjectMap = new Dictionary<string, MeleeWeapon>();
-        foreach (MeleeWeapon weapon in weapons)
-        {
-            if (weapon == null) continue;
-            WeaponScriptableObjectMap[weapon.name] = weapon;
-        }
     }
 
     private void Update()
@@ -185,12 +178,12 @@ public class MeleeController : MonoBehaviour
     public bool TryGetWeapon(string weaponName, out MeleeWeapon weapon)
     {
         weapon = null;
-        if (string.IsNullOrEmpty(weaponName) || WeaponScriptableObjectMap == null)
+        if (weaponCatalog == null)
         {
             return false;
         }
 
-        return WeaponScriptableObjectMap.TryGetValue(weaponName, out weapon) && weapon != null;
+        return weaponCatalog.TryGetMelee(weaponName, out weapon);
     }
 
     /// <summary>
@@ -206,7 +199,7 @@ public class MeleeController : MonoBehaviour
         MeleeWeapon fists = UnarmedWeapon;
         if (fists == null)
         {
-            Debug.LogWarning("MeleeController: Fists weapon is not registered on the weapons list.");
+            Debug.LogWarning("MeleeController: Fists weapon is not registered on the weapon catalog.");
             PlayerStats.ClearMeleeWeapon();
             currentMeleeWeapon = null;
             attackSize = Vector2.zero;

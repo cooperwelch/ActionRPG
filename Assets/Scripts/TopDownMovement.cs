@@ -98,12 +98,20 @@ public class TopDownMovement : MonoBehaviour
     public void StopMovement()
     {
         stopMovement = true;
-        animator.speed = 0;
     }
 
     public void AllowMovement()
     {
         stopMovement = false;
+    }
+
+    public void StopAnimation()
+    {
+        animator.speed = 0;
+    }
+
+    public void StartAnimation()
+    {
         animator.speed = 1;
     }
 

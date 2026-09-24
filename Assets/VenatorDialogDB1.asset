@@ -1331,7 +1331,7 @@ MonoBehaviour:
         type: 0
         typeString: CustomFieldType_Text
       - title: Dialogue Text
-        value: 'Very good, very good.
+        value: 'Very good.
 
 '
         type: 0
@@ -1388,7 +1388,8 @@ MonoBehaviour:
         type: 0
         typeString: CustomFieldType_Text
       - title: Dialogue Text
-        value: Now you can safely explore the forest. Please be careful.
+        value: Now you can safely explore the forest. But please be careful...who
+          knows what might be lurking out there.
         type: 0
         typeString: CustomFieldType_Text
       - title: Sequence
@@ -1685,7 +1686,7 @@ MonoBehaviour:
         height: 30
     entryGroups: []
     canvasScrollPosition: {x: 0, y: 0}
-    canvasZoom: 0.79741734
+    canvasZoom: 0.8512265
   - id: 9
     fields:
     - title: Title
@@ -2130,7 +2131,7 @@ MonoBehaviour:
         type: 0
         typeString: CustomFieldType_Text
       - title: Dialogue Text
-        value: It looks like my vessel is damaged beyond repair, and all of my provisions
+        value: Looks like my vessel is damaged beyond repair...and most of my provisions
           lost.
         type: 0
         typeString: CustomFieldType_Text
@@ -2241,7 +2242,7 @@ MonoBehaviour:
         type: 0
         typeString: CustomFieldType_Text
       - title: Dialogue Text
-        value: I'm lucky to have survived that encounter...
+        value: '*Unggg* ...barely.'
         type: 0
         typeString: CustomFieldType_Text
       - title: Sequence
@@ -2296,7 +2297,7 @@ MonoBehaviour:
         type: 0
         typeString: CustomFieldType_Text
       - title: Dialogue Text
-        value: Julia, Marcus...please wait just a little longer. I will find a way
+        value: Julia, Marcus...please wait for me a little longer. I'll find a way
           back to you.
         type: 0
         typeString: CustomFieldType_Text
@@ -2346,7 +2347,7 @@ MonoBehaviour:
         type: 0
         typeString: CustomFieldType_Text
       - title: Dialogue Text
-        value: But I will find a way home.
+        value: Just when I thought it couldn't get any worse...
         type: 0
         typeString: CustomFieldType_Text
       - title: Sequence

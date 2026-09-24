@@ -19,8 +19,7 @@ public class SubzoneHUD : MonoBehaviour
     [SerializeField] private Color ammoEmptyColor = new Color(0.5f, 0.5f, 0.5f, 1f);
     [SerializeField] private GameObject hudChrome;
     [SerializeField] private bool hudVisibleWithMenuOnly;
-
-    private SecondaryWeaponController _secondaryWeaponController;
+    [SerializeField] private WeaponCatalog weaponCatalog;
 
     private void Awake()
     {
@@ -33,23 +32,13 @@ public class SubzoneHUD : MonoBehaviour
 
     private void Start()
     {
-        _secondaryWeaponController = FindObjectOfType<SecondaryWeaponController>();
-
-        MeleeController meleeController = FindObjectOfType<MeleeController>();
-        if (meleeController != null && meleeController.HasWeapon && meleeController.currentMeleeWeapon != null)
+        PlayerStats.Initialize();
+        if (weaponCatalog == null)
         {
-            SetItemFrameImage(meleeController.currentMeleeWeapon.itemFrameImage);
-        }
-        else
-        {
-            SetItemFrameImage(null);
+            Debug.LogWarning("SubzoneHUD: Weapon Catalog is not assigned.");
         }
 
-        if (_secondaryWeaponController == null || !_secondaryWeaponController.HasWeapon)
-        {
-            SetSecondaryItemFrameImage(null);
-        }
-
+        RefreshEquippedFrames();
         UpdateStatTexts();
 
         if (attackValueText != null)
@@ -112,11 +101,10 @@ public class SubzoneHUD : MonoBehaviour
 
         if (ammoValueText != null)
         {
-            ammoValueText.text = GetSecondaryWeaponAmmoText();
-            bool isEmpty = _secondaryWeaponController == null
-                || !_secondaryWeaponController.HasWeapon
-                || _secondaryWeaponController.CurrentAmmo <= 0;
-            ammoValueText.color = isEmpty ? ammoEmptyColor : ammoNormalColor;
+            int ammo = GetSecondaryWeaponAmmo();
+            bool hasSecondary = !string.IsNullOrEmpty(PlayerStats.SecondaryWeapon);
+            ammoValueText.text = hasSecondary ? ammo.ToString("D2") : "00";
+            ammoValueText.color = !hasSecondary || ammo <= 0 ? ammoEmptyColor : ammoNormalColor;
         }
 
         if (oreValueText != null)
@@ -130,15 +118,39 @@ public class SubzoneHUD : MonoBehaviour
         }
     }
 
-    private string GetSecondaryWeaponAmmoText()
+    private void RefreshEquippedFrames()
     {
-        if (_secondaryWeaponController == null || !_secondaryWeaponController.HasWeapon)
+        Sprite primaryIcon = null;
+        if (weaponCatalog != null
+            && weaponCatalog.TryGetMelee(PlayerStats.MeleeWeapon, out MeleeWeapon melee)
+            && melee != null)
         {
-            return "00";
+            primaryIcon = melee.itemFrameImage;
         }
 
-        return _secondaryWeaponController.CurrentAmmo.ToString("D2");
+        SetItemFrameImage(primaryIcon);
+
+        Sprite secondaryIcon = null;
+        if (weaponCatalog != null
+            && weaponCatalog.TryGetSecondary(PlayerStats.SecondaryWeapon, out SecondaryWeapon secondary)
+            && secondary != null)
+        {
+            secondaryIcon = secondary.itemFrameImage;
+        }
+
+        SetSecondaryItemFrameImage(secondaryIcon);
     }
+
+    private static int GetSecondaryWeaponAmmo()
+    {
+        if (string.IsNullOrEmpty(PlayerStats.SecondaryWeapon))
+        {
+            return 0;
+        }
+
+        return PlayerStats.GetSecondaryWeaponAmmo(PlayerStats.SecondaryWeapon);
+    }
+
     public void FillBossHealthMeter()
     {
         if (bossHealthMeter != null)

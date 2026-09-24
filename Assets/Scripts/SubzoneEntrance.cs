@@ -20,8 +20,10 @@ public class SubzoneEntrance : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("OverworldHero"))
         {
-            // stop hero movement
-            collision.GetComponent<TopDownMovement>().StopMovement();
+            // stop hero movement and animation
+            TopDownMovement heroMovement = collision.GetComponent<TopDownMovement>();
+            heroMovement.StopMovement();
+            heroMovement.StopAnimation();
 
             Vector3 encounterPosition = usePositionOverride ?
                 positionOverride : gameObject.transform.position;

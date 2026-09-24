@@ -915,7 +915,7 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 20
+        x: 28.505104
         y: 102
         width: 160
         height: 30
@@ -973,7 +973,7 @@ MonoBehaviour:
       canvasRect:
         serializedVersion: 2
         x: 27.89264
-        y: 159.3141
+        y: 158.0991
         width: 160
         height: 30
     - id: 4
@@ -1245,7 +1245,7 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 34.157043
+        x: 35.372063
         y: 422
         width: 160
         height: 30
@@ -1300,8 +1300,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 364.97772
-        y: 109.92529
+        x: 285.73975
+        y: 125.1427
         width: 160
         height: 30
     - id: 10
@@ -1327,7 +1327,7 @@ MonoBehaviour:
         type: 0
         typeString: CustomFieldType_Text
       - title: Dialogue Text
-        value: 'Very good, very good.
+        value: 'Very good. I''m sure a man like you will wield it skillfully.
 
 '
         type: 0
@@ -1357,8 +1357,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 364.97772
-        y: 181.58308
+        x: 285.73975
+        y: 197.5937
         width: 160
         height: 30
     - id: 11
@@ -1384,7 +1384,8 @@ MonoBehaviour:
         type: 0
         typeString: CustomFieldType_Text
       - title: Dialogue Text
-        value: Now you can safely explore the forest. Please be careful.
+        value: The recent disappearances of our residents is worrying...I fear something
+          dangerous lurks in the forest.
         type: 0
         typeString: CustomFieldType_Text
       - title: Sequence
@@ -1398,7 +1399,13 @@ MonoBehaviour:
       delaySimStatus: 0
       falseConditionAction: Block
       conditionPriority: 2
-      outgoingLinks: []
+      outgoingLinks:
+      - originConversationID: 8
+        originDialogueID: 11
+        destinationConversationID: 8
+        destinationDialogueID: 18
+        isConnector: 0
+        priority: 2
       conditionsString: 
       userScript: 
       onExecute:
@@ -1406,8 +1413,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 366.42157
-        y: 253.24089
+        x: 285.9686
+        y: 264.3915
         width: 160
         height: 30
     - id: 12
@@ -1433,7 +1440,7 @@ MonoBehaviour:
         type: 0
         typeString: CustomFieldType_Text
       - title: Dialogue Text
-        value: A cyclops?!
+        value: A monster?!
         type: 0
         typeString: CustomFieldType_Text
       - title: Sequence
@@ -1461,8 +1468,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 676.6399
-        y: 78.00356
+        x: 507.354
+        y: 85.42544
         width: 160
         height: 30
     - id: 14
@@ -1480,7 +1487,7 @@ MonoBehaviour:
         type: 5
         typeString: CustomFieldType_Actor
       - title: Conversant
-        value: 1
+        value: 4
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
@@ -1516,8 +1523,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 678.55194
-        y: 313.5473
+        x: 506.315
+        y: 402.5266
         width: 160
         height: 30
     - id: 15
@@ -1571,8 +1578,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 678.29694
-        y: 157.595
+        x: 507.95886
+        y: 164.4179
         width: 160
         height: 30
     - id: 16
@@ -1590,7 +1597,7 @@ MonoBehaviour:
         type: 5
         typeString: CustomFieldType_Actor
       - title: Conversant
-        value: 1
+        value: 4
         type: 5
         typeString: CustomFieldType_Actor
       - title: Menu Text
@@ -1620,8 +1627,8 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 677.98474
-        y: 398.1148
+        x: 506.96277
+        y: 480.85272
         width: 160
         height: 30
     - id: 17
@@ -1647,7 +1654,8 @@ MonoBehaviour:
         type: 0
         typeString: CustomFieldType_Text
       - title: Dialogue Text
-        value: 'I fear there may be darker machinations at work among these islands... '
+        value: Unabating storms at sea, monsters roaming among men, and rumors of
+          the dead rising from their graves...
         type: 0
         typeString: CustomFieldType_Text
       - title: Sequence
@@ -1665,6 +1673,110 @@ MonoBehaviour:
       - originConversationID: 8
         originDialogueID: 17
         destinationConversationID: 8
+        destinationDialogueID: 20
+        isConnector: 0
+        priority: 2
+      conditionsString: 
+      userScript: 
+      onExecute:
+        m_PersistentCalls:
+          m_Calls: []
+      canvasRect:
+        serializedVersion: 2
+        x: 505.95404
+        y: 240.04715
+        width: 160
+        height: 30
+    - id: 18
+      fields:
+      - title: Title
+        value: 
+        type: 0
+        typeString: CustomFieldType_Text
+      - title: Description
+        value: 
+        type: 0
+        typeString: CustomFieldType_Text
+      - title: Actor
+        value: 4
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Conversant
+        value: 4
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Menu Text
+        value: 
+        type: 0
+        typeString: CustomFieldType_Text
+      - title: Dialogue Text
+        value: Please be careful out there.
+        type: 0
+        typeString: CustomFieldType_Text
+      - title: Sequence
+        value: 
+        type: 0
+        typeString: CustomFieldType_Text
+      conversationID: 8
+      isRoot: 0
+      isGroup: 0
+      nodeColor: 
+      delaySimStatus: 0
+      falseConditionAction: Block
+      conditionPriority: 2
+      outgoingLinks: []
+      conditionsString: 
+      userScript: 
+      onExecute:
+        m_PersistentCalls:
+          m_Calls: []
+      canvasRect:
+        serializedVersion: 2
+        x: 287.18362
+        y: 333.83167
+        width: 160
+        height: 30
+    - id: 20
+      fields:
+      - title: Title
+        value: 
+        type: 0
+        typeString: CustomFieldType_Text
+      - title: Description
+        value: 
+        type: 0
+        typeString: CustomFieldType_Text
+      - title: Actor
+        value: 4
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Conversant
+        value: 4
+        type: 5
+        typeString: CustomFieldType_Actor
+      - title: Menu Text
+        value: 
+        type: 0
+        typeString: CustomFieldType_Text
+      - title: Dialogue Text
+        value: 'I fear there may be darker machinations at work within these islands. '
+        type: 0
+        typeString: CustomFieldType_Text
+      - title: Sequence
+        value: 
+        type: 0
+        typeString: CustomFieldType_Text
+      conversationID: 8
+      isRoot: 0
+      isGroup: 0
+      nodeColor: 
+      delaySimStatus: 0
+      falseConditionAction: Block
+      conditionPriority: 2
+      outgoingLinks:
+      - originConversationID: 8
+        originDialogueID: 20
+        destinationConversationID: 8
         destinationDialogueID: 14
         isConnector: 0
         priority: 2
@@ -1675,13 +1787,13 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 678.29694
-        y: 233.58493
+        x: 506.74725
+        y: 321.11508
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 0, y: 0}
-    canvasZoom: 0.79741734
+    canvasScrollPosition: {x: 14.309652, y: 7.6401987}
+    canvasZoom: 0.49794695
   - id: 9
     fields:
     - title: Title

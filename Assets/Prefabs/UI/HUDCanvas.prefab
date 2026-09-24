@@ -1767,6 +1767,7 @@ MonoBehaviour:
   ammoEmptyColor: {r: 0.49803922, g: 0.49803922, b: 0.49803922, a: 1}
   hudChrome: {fileID: 2044853668514510800}
   hudVisibleWithMenuOnly: 0
+  weaponCatalog: {fileID: 11400000, guid: b8e2c4d6f0a14e7b9c3d5f7a1b2e4068, type: 2}
 --- !u!1 &2044853668514510800
 GameObject:
   m_ObjectHideFlags: 0

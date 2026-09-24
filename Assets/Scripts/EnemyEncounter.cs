@@ -29,6 +29,7 @@ public class EnemyEncounter : MonoBehaviour
             );
 
             heroMovement.StopMovement();
+            heroMovement.StopAnimation();
             enemyMovement.StopMovement();
             StartCoroutine(SubzoneTransition());
         }

@@ -1,9 +1,8 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SecondaryWeaponController : MonoBehaviour
 {
-    [SerializeField] private List<SecondaryWeapon> weapons;
+    [SerializeField] private WeaponCatalog weaponCatalog;
 
     public SecondaryWeapon currentWeapon { get; private set; }
     public bool HasWeapon
@@ -17,14 +16,18 @@ public class SecondaryWeaponController : MonoBehaviour
     public bool HasAmmo => HasWeapon && PlayerStats.GetSecondaryWeaponAmmo(currentWeapon.name) > 0;
     public int CurrentAmmo => HasWeapon ? PlayerStats.GetSecondaryWeaponAmmo(currentWeapon.name) : 0;
 
-    private Dictionary<string, SecondaryWeapon> _weaponMap;
     private float _cooldownTimer;
     private int _currentWeaponIndex = -1;
 
     private void Awake()
     {
         PlayerStats.Initialize();
-        InitializeWeaponMap();
+        if (weaponCatalog == null)
+        {
+            Debug.LogWarning("SecondaryWeaponController: Weapon Catalog is not assigned.");
+        }
+
+        InitializeAmmoFromCatalog();
         LoadLastEquippedSecondaryWeapon();
     }
 
@@ -33,7 +36,11 @@ public class SecondaryWeaponController : MonoBehaviour
         if (_cooldownTimer > 0f)
             _cooldownTimer -= Time.deltaTime;
 
-        if (Input.GetKeyDown(KeyCode.T) && weapons.Count > 0 && !GameplayUI.IsBlocking)
+        if (Input.GetKeyDown(KeyCode.T)
+            && weaponCatalog != null
+            && weaponCatalog.secondaryWeapons != null
+            && weaponCatalog.secondaryWeapons.Count > 0
+            && !GameplayUI.IsBlocking)
         {
             EquipNextAvailableWeapon();
         }
@@ -70,29 +77,39 @@ public class SecondaryWeaponController : MonoBehaviour
     public bool TryGetWeapon(string weaponName, out SecondaryWeapon weapon)
     {
         weapon = null;
-        if (string.IsNullOrEmpty(weaponName) || _weaponMap == null)
+        if (weaponCatalog == null)
         {
             return false;
         }
 
-        return _weaponMap.TryGetValue(weaponName, out weapon) && weapon != null;
+        return weaponCatalog.TryGetSecondary(weaponName, out weapon);
     }
 
-    private void InitializeWeaponMap()
+    private void InitializeAmmoFromCatalog()
     {
-        _weaponMap = new Dictionary<string, SecondaryWeapon>();
-        foreach (SecondaryWeapon weapon in weapons)
+        if (weaponCatalog == null || weaponCatalog.secondaryWeapons == null)
         {
-            _weaponMap[weapon.name] = weapon;
+            return;
+        }
+
+        foreach (SecondaryWeapon weapon in weaponCatalog.secondaryWeapons)
+        {
+            if (weapon == null)
+            {
+                continue;
+            }
+
             PlayerStats.InitializeSecondaryWeaponAmmo(weapon.name, weapon.maxAmmo);
         }
     }
 
     private void LoadLastEquippedSecondaryWeapon()
     {
-        if (PlayerStats.SecondaryWeapon != null && _weaponMap.ContainsKey(PlayerStats.SecondaryWeapon))
+        if (weaponCatalog != null
+            && PlayerStats.SecondaryWeapon != null
+            && weaponCatalog.TryGetSecondary(PlayerStats.SecondaryWeapon, out SecondaryWeapon weapon))
         {
-            EquipWeapon(_weaponMap[PlayerStats.SecondaryWeapon]);
+            EquipWeapon(weapon);
         }
     }
 
@@ -102,9 +119,9 @@ public class SecondaryWeaponController : MonoBehaviour
 
         _currentWeaponIndex = (_currentWeaponIndex + 1) % PlayerStats.SecondaryWeapons.Count;
         string weaponName = PlayerStats.SecondaryWeapons[_currentWeaponIndex];
-        if (_weaponMap.ContainsKey(weaponName))
+        if (weaponCatalog != null && weaponCatalog.TryGetSecondary(weaponName, out SecondaryWeapon weapon))
         {
-            EquipWeapon(_weaponMap[weaponName]);
+            EquipWeapon(weapon);
         }
     }
 }

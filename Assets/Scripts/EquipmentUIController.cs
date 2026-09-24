@@ -22,6 +22,7 @@ public class EquipmentUIController : MonoBehaviour
     [SerializeField] private float descriptionSpacing = -7f;
     [SerializeField] private Image menuCursor;
     [SerializeField] private float cursorOffsetFromOptionLeft = 4f;
+    [SerializeField] private WeaponCatalog weaponCatalog;
 
     private readonly List<EquipmentSlotView> primarySlots = new List<EquipmentSlotView>();
     private readonly List<EquipmentSlotView> secondarySlots = new List<EquipmentSlotView>();
@@ -45,6 +46,11 @@ public class EquipmentUIController : MonoBehaviour
         if (menuCursor != null && menuCursor.rectTransform.sizeDelta.x > 0f)
         {
             cursorSize = menuCursor.rectTransform.sizeDelta;
+        }
+
+        if (weaponCatalog == null)
+        {
+            Debug.LogWarning("EquipmentUIController: Weapon Catalog is not assigned.");
         }
     }
 
@@ -108,12 +114,21 @@ public class EquipmentUIController : MonoBehaviour
                 return false;
             }
 
-            if (meleeController == null || !meleeController.TryGetWeapon(weaponName, out MeleeWeapon weapon))
+            if (weaponCatalog == null || !weaponCatalog.TryGetMelee(weaponName, out MeleeWeapon weapon))
             {
                 return false;
             }
 
-            meleeController.EquipMeleeWeapon(weapon);
+            if (meleeController != null)
+            {
+                meleeController.EquipMeleeWeapon(weapon);
+            }
+            else
+            {
+                PlayerStats.EquipMeleeWeapon(weapon.name, weapon.attackDamage);
+                ApplyHudPrimaryIcon(weapon.itemFrameImage);
+            }
+
             return true;
         }
 
@@ -125,13 +140,21 @@ public class EquipmentUIController : MonoBehaviour
                 return false;
             }
 
-            if (secondaryWeaponController == null
-                || !secondaryWeaponController.TryGetWeapon(weaponName, out SecondaryWeapon weapon))
+            if (weaponCatalog == null || !weaponCatalog.TryGetSecondary(weaponName, out SecondaryWeapon weapon))
             {
                 return false;
             }
 
-            secondaryWeaponController.EquipWeapon(weapon);
+            if (secondaryWeaponController != null)
+            {
+                secondaryWeaponController.EquipWeapon(weapon);
+            }
+            else
+            {
+                PlayerStats.EquipSecondaryWeapon(weapon.name);
+                ApplyHudSecondaryIcon(weapon.itemFrameImage);
+            }
+
             return true;
         }
 
@@ -198,15 +221,19 @@ public class EquipmentUIController : MonoBehaviour
 
     private Sprite GetWeaponIcon(string weaponName, bool isPrimary)
     {
+        if (weaponCatalog == null)
+        {
+            return null;
+        }
+
         if (isPrimary)
         {
-            if (meleeController != null && meleeController.TryGetWeapon(weaponName, out MeleeWeapon melee))
+            if (weaponCatalog.TryGetMelee(weaponName, out MeleeWeapon melee))
             {
                 return melee.itemFrameImage;
             }
         }
-        else if (secondaryWeaponController != null
-            && secondaryWeaponController.TryGetWeapon(weaponName, out SecondaryWeapon secondary))
+        else if (weaponCatalog.TryGetSecondary(weaponName, out SecondaryWeapon secondary))
         {
             return secondary.itemFrameImage;
         }
@@ -223,8 +250,8 @@ public class EquipmentUIController : MonoBehaviour
         {
             string weaponName = GetAcquiredName(PlayerStats.MeleeWeapons, column);
             if (string.IsNullOrEmpty(weaponName)
-                || meleeController == null
-                || !meleeController.TryGetWeapon(weaponName, out MeleeWeapon weapon))
+                || weaponCatalog == null
+                || !weaponCatalog.TryGetMelee(weaponName, out MeleeWeapon weapon))
             {
                 return false;
             }
@@ -238,8 +265,8 @@ public class EquipmentUIController : MonoBehaviour
         {
             string weaponName = GetAcquiredName(PlayerStats.SecondaryWeapons, column);
             if (string.IsNullOrEmpty(weaponName)
-                || secondaryWeaponController == null
-                || !secondaryWeaponController.TryGetWeapon(weaponName, out SecondaryWeapon weapon))
+                || weaponCatalog == null
+                || !weaponCatalog.TryGetSecondary(weaponName, out SecondaryWeapon weapon))
             {
                 return false;
             }
@@ -338,6 +365,24 @@ public class EquipmentUIController : MonoBehaviour
 
         float underneathY = panelRect.anchoredPosition.y - panelRect.rect.height - descriptionSpacing;
         descriptionPanelRect.anchoredPosition = new Vector2(panelRect.anchoredPosition.x, underneathY);
+    }
+
+    private static void ApplyHudPrimaryIcon(Sprite icon)
+    {
+        SubzoneHUD hud = FindObjectOfType<SubzoneHUD>();
+        if (hud != null)
+        {
+            hud.SetItemFrameImage(icon);
+        }
+    }
+
+    private static void ApplyHudSecondaryIcon(Sprite icon)
+    {
+        SubzoneHUD hud = FindObjectOfType<SubzoneHUD>();
+        if (hud != null)
+        {
+            hud.SetSecondaryItemFrameImage(icon);
+        }
     }
 
     private void CacheControllers()
