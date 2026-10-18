@@ -16,6 +16,7 @@ public class MeleeWeapon : ScriptableObject
     public bool canDamageEnemies = true;
     public bool canMineOre = false;
     public bool canBreakBreakables = false;
+    public bool canBreakRocks = false;
 
     public LayerMask GetAttackLayerMask()
     {
@@ -31,6 +32,10 @@ public class MeleeWeapon : ScriptableObject
         if (canBreakBreakables)
         {
             mask |= 1 << LayerMask.NameToLayer("Breakables");
+        }
+        if (canBreakRocks)
+        {
+            mask |= 1 << LayerMask.NameToLayer("Rocks");
         }
         return mask;
     }

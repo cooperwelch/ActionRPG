@@ -152,9 +152,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 8
   attackDamage: 1
-  health: 2
+  health: 3
   audioManager: {fileID: 0}
   cameraShake: {fileID: 0}
+  enableHitStun: 1
+  hitStunDuration: 0.1
   player: {fileID: 0}
   _boxCollider: {fileID: 6051015354650089038}
   swoopOvershoot: 1.5
@@ -207,9 +209,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea593064310720a4295250cf023ccc89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _flashColor: {r: 0.69803923, g: 0, b: 0, a: 0}
-  _flashTime: 0.1
-  _flashAlpha: 1
+  _flashColor: {r: 1, g: 0, b: 0, a: 1}
+  _secondFlashColor: {r: 1, g: 0.64705884, b: 0, a: 1}
+  _flashTime: 0.07
+  _flashAlpha: 0.7
   _flashCount: 1
 --- !u!1 &4219641615322611195
 GameObject:

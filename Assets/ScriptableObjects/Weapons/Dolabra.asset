@@ -22,6 +22,7 @@ MonoBehaviour:
   canDamageEnemies: 1
   canMineOre: 1
   canBreakBreakables: 1
+  canBreakRocks: 1
   projectilePrefab: {fileID: 8844091647254525655, guid: 64b17a100f0bb4e7699a64cc253b8d2b, type: 3}
   throwSpeed: 14
   launchAngle: 75

@@ -38,8 +38,10 @@ public class SubzoneCrab : SubzoneEnemy
     }
 
 #if UNITY_EDITOR
-    private void OnValidate()
+    protected override void OnValidate()
     {
+        base.OnValidate();
+
         if (minHideDuration > maxHideDuration)
             (minHideDuration, maxHideDuration) = (maxHideDuration, minHideDuration);
     }
@@ -53,11 +55,16 @@ public class SubzoneCrab : SubzoneEnemy
         EnterHiding();
     }
 
+    protected override bool CanBeStunned()
+    {
+        return enableHitStun && _state == CrabState.Moving;
+    }
+
     public override void Update()
     {
         base.Update();
 
-        if (_isDying)
+        if (_isDying || IsHitStunned)
             return;
 
         switch (_state)

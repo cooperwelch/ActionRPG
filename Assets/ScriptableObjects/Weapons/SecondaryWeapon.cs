@@ -14,6 +14,7 @@ public abstract class SecondaryWeapon : ScriptableObject
     public bool canDamageEnemies = true;
     public bool canMineOre = false;
     public bool canBreakBreakables = false;
+    public bool canBreakRocks = false;
 
     public abstract void Execute(Transform player, Vector2 direction, bool isCrouching);
 }

@@ -18,18 +18,21 @@ public class Projectile : MonoBehaviour
     private bool _canDamageEnemies = true;
     private bool _canMineOre;
     private bool _canBreakBreakables;
+    private bool _canBreakRocks;
 
     public void Initialize(
         int damage,
         Vector2 velocity,
         bool canDamageEnemies = true,
         bool canMineOre = false,
-        bool canBreakBreakables = false)
+        bool canBreakBreakables = false,
+        bool canBreakRocks = false)
     {
         _damage = damage;
         _canDamageEnemies = canDamageEnemies;
         _canMineOre = canMineOre;
         _canBreakBreakables = canBreakBreakables;
+        _canBreakRocks = canBreakRocks;
         _rigidBody = GetComponent<Rigidbody2D>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _particleRenderer = GetComponentInChildren<ParticleSystemRenderer>();
@@ -71,50 +74,59 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (_damageCooldownTimer > 0f) return;
-
         float damageDirection = Utilities.DamageDirection(gameObject, collision.gameObject);
-        bool hitSomething = false;
+        bool hitEnemyOrOre = false;
 
-        if (_canDamageEnemies)
+        if (_damageCooldownTimer <= 0f)
         {
-            IDamageable target = collision.GetComponentInParent<IDamageable>();
-            if (target != null)
+            if (_canDamageEnemies)
             {
-                target.Damage(_damage, damageDirection);
-                hitSomething = true;
+                IDamageable target = collision.GetComponentInParent<IDamageable>();
+                if (target != null)
+                {
+                    target.Damage(_damage, damageDirection);
+                    hitEnemyOrOre = true;
+                }
+            }
+
+            if (_canMineOre)
+            {
+                IMineable mineable = collision.GetComponentInParent<IMineable>();
+                if (mineable != null)
+                {
+                    mineable.Mine(damageDirection);
+                    hitEnemyOrOre = true;
+                }
             }
         }
 
-        if (_canMineOre)
-        {
-            IMineable mineable = collision.GetComponentInParent<IMineable>();
-            if (mineable != null)
-            {
-                mineable.Mine(damageDirection);
-                hitSomething = true;
-            }
-        }
-
-        if (_canBreakBreakables)
+        bool hitBreakable = false;
+        if (_canBreakBreakables || _canBreakRocks)
         {
             IBreakable breakable = collision.GetComponentInParent<IBreakable>();
-            if (breakable != null)
+            if (breakable != null && CanBreak(breakable))
             {
                 breakable.Hit(damageDirection);
-                hitSomething = true;
+                hitBreakable = true;
             }
         }
 
-        if (!hitSomething) return;
-
-        if (destroyOnHit)
+        if (destroyOnHit && (hitEnemyOrOre || hitBreakable))
         {
             Destroy(gameObject);
+            return;
         }
-        else
+
+        if (hitEnemyOrOre)
         {
             _damageCooldownTimer = damageCooldown;
         }
+    }
+
+    private bool CanBreak(IBreakable breakable)
+    {
+        return breakable.Kind == BreakableKind.Rock
+            ? _canBreakRocks
+            : _canBreakBreakables;
     }
 }

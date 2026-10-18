@@ -796,7 +796,7 @@ MonoBehaviour:
   maxLines: 100
   delayTypewriterUntilOpen: 0
   continueButton: {fileID: 11451356}
-  blockInputDuration: 0
+  blockInputDuration: 0.01
   visibility: 1
   focusAnimationTrigger: 
   unfocusAnimationTrigger: 
@@ -846,6 +846,7 @@ MonoBehaviour:
   finalSizeDeltaX: -171
   startSizeDeltaX: -400
   showTriggerName: Show
+  startStateName: Start
   settleFrames: 1
 --- !u!1 &114694
 GameObject:

@@ -26,7 +26,8 @@ public class Plumbata : SecondaryWeapon
             velocity,
             canDamageEnemies,
             canMineOre,
-            canBreakBreakables
+            canBreakBreakables,
+            canBreakRocks
         );
     }
 }

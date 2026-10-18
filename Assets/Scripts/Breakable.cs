@@ -15,6 +15,7 @@ public class Breakable : MonoBehaviour, IBreakable
     private const float DropMaxHorizontalSpeed = 2f;
 
     [Header("Hits")]
+    [SerializeField] private BreakableKind kind = BreakableKind.Standard;
     [SerializeField] private int hitsToBreak = 1;
     [SerializeField] private Sprite[] stageSprites;
 
@@ -32,6 +33,8 @@ public class Breakable : MonoBehaviour, IBreakable
     private SpriteRenderer spriteRenderer;
     private int hitsTaken;
     private bool isDestroyed;
+
+    public BreakableKind Kind => kind;
 
     private void Awake()
     {

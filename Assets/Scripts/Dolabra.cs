@@ -26,7 +26,8 @@ public class Dolabra : SecondaryWeapon
             velocity,
             canDamageEnemies,
             canMineOre,
-            canBreakBreakables
+            canBreakBreakables,
+            canBreakRocks
         );
     }
 }

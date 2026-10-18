@@ -8,6 +8,8 @@ using PixelCrushers.DialogueSystem;
 /// Measures dialog height at the final width (with full subtitle text), locks that height,
 /// then plays the panel show animation so horizontal expand does not reflow/jerk height
 /// via Content Size Fitter.
+/// Keeps the panel in Opening until that show animation finishes so Dialogue System
+/// does not treat the panel as Open mid-animation.
 /// </summary>
 [RequireComponent(typeof(RectTransform))]
 public class DialogPanelFlexibleHeightHelper : MonoBehaviour
@@ -22,12 +24,16 @@ public class DialogPanelFlexibleHeightHelper : MonoBehaviour
     private ContentSizeFitter contentSizeFitter;
     private LayoutElement layoutElement;
     private Animator animator;
+    private CanvasGroup canvasGroup;
     private UIPanel uiPanel;
     private StandardUISubtitlePanel subtitlePanel;
 
     private float lockedHeight;
     private bool heightLocked;
+    private bool hideUntilMeasured;
     private Coroutine prepareCoroutine;
+    private float savedAnimatorSpeed = 1f;
+    private bool animatorSpeedOverridden;
 
     private void Awake()
     {
@@ -40,11 +46,13 @@ public class DialogPanelFlexibleHeightHelper : MonoBehaviour
         }
 
         animator = GetComponent<Animator>();
+        canvasGroup = GetComponent<CanvasGroup>();
         uiPanel = GetComponent<UIPanel>();
         subtitlePanel = GetComponent<StandardUISubtitlePanel>();
 
-        // Open() runs before subtitle text is set. Take ownership of the show trigger
-        // so we can measure at full width first, then expand.
+        // Open() runs before subtitle text is set. Keep the show trigger so
+        // waitForShowAnimationToSetOpen can hold Opening while we freeze the
+        // animator, measure at full width, replay Show, then mark Open.
         if (uiPanel != null)
         {
             if (string.IsNullOrEmpty(showTriggerName) && !string.IsNullOrEmpty(uiPanel.showAnimationTrigger))
@@ -52,7 +60,6 @@ public class DialogPanelFlexibleHeightHelper : MonoBehaviour
                 showTriggerName = uiPanel.showAnimationTrigger;
             }
 
-            uiPanel.showAnimationTrigger = string.Empty;
             uiPanel.onOpen.AddListener(OnPanelOpen);
             uiPanel.onClose.AddListener(OnPanelClose);
         }
@@ -71,6 +78,13 @@ public class DialogPanelFlexibleHeightHelper : MonoBehaviour
 
     private void LateUpdate()
     {
+        // Keep hidden until height is locked so pre-measure CSF size never flashes.
+        // Also fights the frozen Show clip, which keys CanvasGroup alpha to 1.
+        if (hideUntilMeasured && canvasGroup != null)
+        {
+            canvasGroup.alpha = 0f;
+        }
+
         // Animator Write Defaults + clips that only key SizeDelta.x can overwrite height.
         if (heightLocked)
         {
@@ -85,6 +99,24 @@ public class DialogPanelFlexibleHeightHelper : MonoBehaviour
             StopCoroutine(prepareCoroutine);
         }
 
+        // Ensure Open()'s upcoming SetTrigger waits, so panelState stays Opening
+        // long enough for FocusWhenOpen / other Open gates.
+        if (!string.IsNullOrEmpty(showTriggerName))
+        {
+            uiPanel.showAnimationTrigger = showTriggerName;
+        }
+
+        uiPanel.waitForShowAnimation = true;
+
+        hideUntilMeasured = true;
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = 0f;
+        }
+
+        // Freeze so the Show clip started by Open does not advance before we measure/replay.
+        FreezeAnimator();
+
         prepareCoroutine = StartCoroutine(PrepareThenPlayShow());
     }
 
@@ -96,11 +128,31 @@ public class DialogPanelFlexibleHeightHelper : MonoBehaviour
             prepareCoroutine = null;
         }
 
+        if (uiPanel != null)
+        {
+            uiPanel.animatorMonitor.CancelCurrentAnimation();
+        }
+
+        hideUntilMeasured = false;
+        RestoreAnimatorSpeed();
         UnlockHeight();
     }
 
     private IEnumerator PrepareThenPlayShow()
     {
+        // Let Open() start WaitForAnimation(Show) and FocusWhenOpen begin waiting.
+        yield return null;
+
+        if (uiPanel == null)
+        {
+            prepareCoroutine = null;
+            yield break;
+        }
+
+        // Stop Open's wait so OnVisible is not invoked from the frozen premature Show.
+        uiPanel.animatorMonitor.CancelCurrentAnimation();
+        EnsureOpening();
+
         int frames = Mathf.Max(0, settleFrames);
         for (int i = 0; i < frames; i++)
         {
@@ -115,9 +167,121 @@ public class DialogPanelFlexibleHeightHelper : MonoBehaviour
             yield return null;
         }
 
+        if (uiPanel.panelState == UIPanel.PanelState.Closing ||
+            uiPanel.panelState == UIPanel.PanelState.Closed)
+        {
+            prepareCoroutine = null;
+            yield break;
+        }
+
         MeasureAndLockHeight();
-        PlayShowAnimation();
+        RestoreAnimatorSpeed();
+        EnsureOpening();
+
+        // Reveal only after height is locked; Show will drive alpha from here.
+        hideUntilMeasured = false;
+
+        if (animator == null || !animator.enabled || string.IsNullOrEmpty(showTriggerName))
+        {
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 1f;
+            }
+
+            MarkOpen();
+            prepareCoroutine = null;
+            yield break;
+        }
+
+        // Restart Show from t=0 without going through Start/Hidden, which keys
+        // SizeDelta.y to a fixed placeholder height and causes a visible snap.
+        if (animator != null && !string.IsNullOrEmpty(showTriggerName))
+        {
+            animator.ResetTrigger(showTriggerName);
+        }
+
+        animator.Play(showTriggerName, 0, 0f);
+        ApplyLockedHeight();
+        yield return null;
+        ApplyLockedHeight();
+
+        float timeout = Time.realtimeSinceStartup + UIAnimatorMonitor.MaxWaitDuration;
+        while (Time.realtimeSinceStartup < timeout)
+        {
+            if (uiPanel == null ||
+                uiPanel.panelState == UIPanel.PanelState.Closing ||
+                uiPanel.panelState == UIPanel.PanelState.Closed)
+            {
+                prepareCoroutine = null;
+                yield break;
+            }
+
+            AnimatorStateInfo info = animator.GetCurrentAnimatorStateInfo(0);
+            if (info.IsName(showTriggerName) && info.normalizedTime >= 1f)
+            {
+                break;
+            }
+
+            yield return null;
+        }
+
+        MarkOpen();
         prepareCoroutine = null;
+    }
+
+    private void EnsureOpening()
+    {
+        if (uiPanel == null)
+        {
+            return;
+        }
+
+        if (uiPanel.panelState != UIPanel.PanelState.Closing &&
+            uiPanel.panelState != UIPanel.PanelState.Closed)
+        {
+            uiPanel.panelState = UIPanel.PanelState.Opening;
+        }
+    }
+
+    private void MarkOpen()
+    {
+        if (uiPanel == null)
+        {
+            return;
+        }
+
+        if (uiPanel.panelState == UIPanel.PanelState.Opening)
+        {
+            uiPanel.panelState = UIPanel.PanelState.Open;
+            uiPanel.RefreshSelectablesList();
+        }
+    }
+
+    private void FreezeAnimator()
+    {
+        if (animator == null)
+        {
+            return;
+        }
+
+        if (!animatorSpeedOverridden)
+        {
+            savedAnimatorSpeed = animator.speed > 0f ? animator.speed : 1f;
+            animatorSpeedOverridden = true;
+        }
+
+        animator.speed = 0f;
+    }
+
+    private void RestoreAnimatorSpeed()
+    {
+        if (animator == null || !animatorSpeedOverridden)
+        {
+            return;
+        }
+
+        animator.speed = savedAnimatorSpeed;
+        animatorSpeedOverridden = false;
     }
 
     private string GetSubtitleText()
@@ -179,21 +343,6 @@ public class DialogPanelFlexibleHeightHelper : MonoBehaviour
             size.y = lockedHeight;
             rectTransform.sizeDelta = size;
         }
-    }
-
-    private void PlayShowAnimation()
-    {
-        if (animator == null || string.IsNullOrEmpty(showTriggerName))
-        {
-            return;
-        }
-
-        if (!animator.enabled)
-        {
-            animator.enabled = true;
-        }
-
-        animator.SetTrigger(showTriggerName);
     }
 
     private void UnlockHeight()

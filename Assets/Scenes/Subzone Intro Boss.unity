@@ -344,9 +344,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea593064310720a4295250cf023ccc89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _flashColor: {r: 0.7, g: 0, b: 0, a: 1}
+  _flashColor: {r: 1, g: 0, b: 0, a: 1}
   _flashTime: 0.1
-  _flashAlpha: 1
+  _flashAlpha: 0.6
   _flashCount: 1
 --- !u!4 &146475682 stripped
 Transform:

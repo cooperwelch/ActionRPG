@@ -12,7 +12,14 @@ public interface IMineable
     void Mine(float damageDirection);
 }
 
+public enum BreakableKind
+{
+    Standard,
+    Rock
+}
+
 public interface IBreakable
 {
+    BreakableKind Kind { get; }
     void Hit(float damageDirection);
 }

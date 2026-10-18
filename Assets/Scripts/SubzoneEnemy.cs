@@ -22,6 +22,12 @@ public class SubzoneEnemy : MonoBehaviour, IDamageable
     protected Animator _animator;
     protected bool _isDying = false;
     [SerializeField] protected CameraShake cameraShake;
+    [SerializeField] protected bool enableHitStun = false;
+    [SerializeField] protected float hitStunDuration = 0.1f;
+
+    private float _hitStunTimer;
+
+    protected bool IsHitStunned => _hitStunTimer > 0f;
 
     public virtual void Awake()
     {
@@ -33,8 +39,21 @@ public class SubzoneEnemy : MonoBehaviour, IDamageable
 
     public virtual void Update()
     {
+        if (!enableHitStun && _hitStunTimer > 0f)
+        {
+            ClearHitStun();
+            return;
+        }
 
+        if (!IsHitStunned)
+            return;
+
+        _hitStunTimer -= Time.deltaTime;
+        if (_hitStunTimer <= 0f)
+            ClearHitStun();
     }
+
+    protected virtual bool CanBeStunned() => enableHitStun;
 
     protected void Flip()
     {
@@ -55,7 +74,7 @@ public class SubzoneEnemy : MonoBehaviour, IDamageable
     }
 
     // IDamageable
-    public void Damage(int damage, float damageDirection)
+    public virtual void Damage(int damage, float damageDirection)
     {
         if (health <= 0) return;
 
@@ -70,6 +89,7 @@ public class SubzoneEnemy : MonoBehaviour, IDamageable
             _isDying = true;
             _animator.SetBool("IsDead", true);
             rigidBody.velocity = Vector2.zero;
+            ClearHitStun();
 
             if (TryGetComponent(out CapsuleCollider2D capsule))
             {
@@ -82,7 +102,33 @@ public class SubzoneEnemy : MonoBehaviour, IDamageable
         }
 
         damageFlash.Flash();
+
+        if (CanBeStunned())
+            BeginHitStun();
     }
+
+    private void BeginHitStun()
+    {
+        if (hitStunDuration <= 0f)
+            return;
+
+        _hitStunTimer = hitStunDuration;
+        _animator.speed = 0f;
+    }
+
+    private void ClearHitStun()
+    {
+        _hitStunTimer = 0f;
+        if (_animator != null)
+            _animator.speed = 1f;
+    }
+
+#if UNITY_EDITOR
+    protected virtual void OnValidate()
+    {
+        hitStunDuration = Mathf.Max(0f, hitStunDuration);
+    }
+#endif
 
     public void EnemyDeathAnimationComplete()
     {

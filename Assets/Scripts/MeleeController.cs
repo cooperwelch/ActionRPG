@@ -147,15 +147,19 @@ public class MeleeController : MonoBehaviour
                 }
             }
 
-            if (currentMeleeWeapon.canBreakBreakables)
+            IBreakable breakable = c.GetComponentInParent<IBreakable>();
+            if (breakable != null && CanBreak(currentMeleeWeapon, breakable))
             {
-                IBreakable breakable = c.GetComponentInParent<IBreakable>();
-                if (breakable != null)
-                {
-                    breakable.Hit(damageDirection);
-                }
+                breakable.Hit(damageDirection);
             }
         }
+    }
+
+    private static bool CanBreak(MeleeWeapon weapon, IBreakable breakable)
+    {
+        return breakable.Kind == BreakableKind.Rock
+            ? weapon.canBreakRocks
+            : weapon.canBreakBreakables;
     }
 
     public void PickUpMeleeWeapon(MeleeWeapon weapon)
