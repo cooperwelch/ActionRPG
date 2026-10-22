@@ -26,6 +26,9 @@ public class SubzoneEnemy : MonoBehaviour, IDamageable
     [SerializeField] protected float hitStunDuration = 0.1f;
 
     private float _hitStunTimer;
+    private Vector2 _hitStunVelocity;
+    private float _hitStunGravityScale;
+    private bool _hitStunCachedPhysics;
 
     protected bool IsHitStunned => _hitStunTimer > 0f;
 
@@ -114,6 +117,17 @@ public class SubzoneEnemy : MonoBehaviour, IDamageable
 
         _hitStunTimer = hitStunDuration;
         _animator.speed = 0f;
+
+        if (rigidBody == null || _hitStunCachedPhysics)
+            return;
+
+        _hitStunVelocity = rigidBody.velocity;
+        _hitStunGravityScale = rigidBody.gravityScale;
+        _hitStunCachedPhysics = true;
+
+        rigidBody.velocity = Vector2.zero;
+        rigidBody.gravityScale = 0f;
+        rigidBody.simulated = false;
     }
 
     private void ClearHitStun()
@@ -121,6 +135,14 @@ public class SubzoneEnemy : MonoBehaviour, IDamageable
         _hitStunTimer = 0f;
         if (_animator != null)
             _animator.speed = 1f;
+
+        if (rigidBody == null || !_hitStunCachedPhysics)
+            return;
+
+        rigidBody.simulated = true;
+        rigidBody.gravityScale = _hitStunGravityScale;
+        rigidBody.velocity = _hitStunVelocity;
+        _hitStunCachedPhysics = false;
     }
 
 #if UNITY_EDITOR

@@ -164,5 +164,6 @@ MonoBehaviour:
   sprites:
   - {fileID: 21300000, guid: 5b74132ccb9e2431180cccd8dc8197f6, type: 3}
   - {fileID: 21300000, guid: 2413ffd1cc8f14a239ad6876185f259f, type: 3}
+  - {fileID: 21300000, guid: eccc085bfbc754035a14117cc7489498, type: 3}
   fadeDelay: 1
   fadeDuration: 0.3

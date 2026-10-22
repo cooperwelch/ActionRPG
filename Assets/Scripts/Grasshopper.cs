@@ -54,7 +54,7 @@ public class Grasshopper : SubzoneEnemy
 
     void FixedUpdate()
     {
-        if (_isDying || !_collider.enabled)
+        if (_isDying || !_collider.enabled || IsHitStunned)
             return;
 
         if (_state == GrasshopperState.Jumping)
@@ -113,6 +113,9 @@ public class Grasshopper : SubzoneEnemy
             rigidBody.velocity = Vector2.zero;
             return;
         }
+
+        if (IsHitStunned)
+            return;
 
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 

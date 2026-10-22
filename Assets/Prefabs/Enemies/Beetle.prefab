@@ -235,8 +235,8 @@ MonoBehaviour:
   health: 2
   audioManager: {fileID: 0}
   cameraShake: {fileID: 0}
-  enableHitStun: 0
-  hitStunDuration: 0.1
+  enableHitStun: 1
+  hitStunDuration: 0.2
   patrolFlipTime: 3
 --- !u!114 &909260888257512828
 MonoBehaviour:
@@ -250,8 +250,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea593064310720a4295250cf023ccc89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _flashColor: {r: 1, g: 0, b: 0, a: 1}
-  _secondFlashColor: {r: 1, g: 0.64705884, b: 0, a: 1}
+  _flashColor: {r: 1, g: 0.79607844, b: 0.79607844, a: 1}
+  _secondFlashColor: {r: 1, g: 0, b: 0, a: 1}
   _flashTime: 0.07
-  _flashAlpha: 0.7
+  _flashAlpha: 0.8
   _flashCount: 1

@@ -61,7 +61,8 @@ public class SubzoneOwl : SubzoneEnemy
 
     private void FixedUpdate()
     {
-        if (_isDying) return;
+        if (_isDying || IsHitStunned)
+            return;
 
         switch (_state)
         {
