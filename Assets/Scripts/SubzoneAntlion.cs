@@ -3,8 +3,8 @@ using UnityEngine;
 /// <summary>
 /// Environmental-hazard antlion: head lunges within a world-space arc using
 /// telescoping body segments. Immortal for now; only the head damages the player.
-/// Expected hierarchy: stationary root with sibling children Head (this component) and Ground.
-/// Body segments are spawned as siblings under that root so they are not parented to the head.
+/// Body segments are spawned as hierarchy siblings (parented to this transform's parent)
+/// so they are not children of the moving head.
 /// </summary>
 public class SubzoneAntlion : SubzoneEnemy
 {
@@ -26,8 +26,8 @@ public class SubzoneAntlion : SubzoneEnemy
     [SerializeField] private float minAngleDegrees = 45f;
     [SerializeField] private float maxAngleDegrees = 135f;
     [SerializeField] private float maxReach = 10f;
-    [Tooltip("How far the lunge curve bulges from the straight chord, along the world-upward perpendicular.")]
-    [SerializeField] private float arcHeight = 1.5f;
+    [Tooltip("Maximum bulge from the straight chord (at 45°/135°/225°/315°). Cardinals (0°/90°/180°/270°) use zero arc.")]
+    [SerializeField] private float maxArcHeight = 1.5f;
 
     [Header("Timing")]
     [SerializeField] private float lungeDuration = 0.35f;
@@ -164,7 +164,7 @@ public class SubzoneAntlion : SubzoneEnemy
     {
         base.OnValidate();
         maxReach = Mathf.Max(0.01f, maxReach);
-        arcHeight = Mathf.Max(0f, arcHeight);
+        maxArcHeight = Mathf.Max(0f, maxArcHeight);
         bodySegmentCount = Mathf.Max(0, bodySegmentCount);
         lungeDuration = Mathf.Max(0.01f, lungeDuration);
         retreatDuration = Mathf.Max(0.01f, retreatDuration);
@@ -221,7 +221,7 @@ public class SubzoneAntlion : SubzoneEnemy
 
         _curveP0 = origin2;
         _curveP2 = target;
-        _curveP1 = ComputeArcControlPoint(_curveP0, _curveP2, arcHeight);
+        _curveP1 = ComputeArcControlPoint(_curveP0, _curveP2, maxArcHeight, _restRotationZ);
 
         _headT = 0f;
         _rotationBlend = 0f;
@@ -345,17 +345,10 @@ public class SubzoneAntlion : SubzoneEnemy
 
             float segT = _segmentTs[i];
             Vector2 pos = QuadraticBezier(_curveP0, _curveP1, _curveP2, segT);
-            Vector2 tangent = QuadraticBezierTangent(_curveP0, _curveP1, _curveP2, segT);
-            float segRotZ = Mathf.Atan2(tangent.y, tangent.x) * Mathf.Rad2Deg
-                + spriteFacingOffsetDegrees;
 
             seg.SetPositionAndRotation(
                 new Vector3(pos.x, pos.y, _restPosition.z),
-                Quaternion.Euler(
-                    0f,
-                    0f,
-                    Mathf.LerpAngle(_restRotationZ, segRotZ, Mathf.Clamp01(_rotationBlend))
-                )
+                Quaternion.Euler(0f, 0f, _restRotationZ)
             );
         }
 
@@ -373,23 +366,42 @@ public class SubzoneAntlion : SubzoneEnemy
     }
 
     /// <summary>
-    /// Control point at the chord midpoint, offset along the perpendicular that points more world-up.
+    /// Control point at the chord midpoint, offset along the perpendicular that points more
+    /// along the head's rest facing (into the room for floor/ceiling/wall mounts).
+    /// Effective height scales with |sin(2θ)| so cardinals are straight and diagonals use full max.
     /// </summary>
-    private static Vector2 ComputeArcControlPoint(Vector2 start, Vector2 end, float height)
+    private static Vector2 ComputeArcControlPoint(
+        Vector2 start,
+        Vector2 end,
+        float maxHeight,
+        float restRotationZ)
     {
         Vector2 chord = end - start;
         Vector2 mid = start + chord * 0.5f;
 
-        if (height <= 0f || chord.sqrMagnitude < 0.0001f)
+        if (maxHeight <= 0f || chord.sqrMagnitude < 0.0001f)
             return mid;
 
+        float angleRad = Mathf.Atan2(chord.y, chord.x);
+        float height = maxHeight * Mathf.Abs(Mathf.Sin(2f * angleRad));
+        if (height <= 0f)
+            return mid;
+
+        // Jaws / out-of-mount direction at rest (sprite "up" in world space).
+        Vector2 restForward = Quaternion.Euler(0f, 0f, restRotationZ) * Vector2.up;
+
         Vector2 perp = new Vector2(-chord.y, chord.x);
-        if (Vector2.Dot(perp, Vector2.up) < 0f)
+        if (Vector2.Dot(perp, restForward) < 0f)
             perp = -perp;
 
-        // Near-vertical lunges: both perpendiculars are horizontal — prefer +X for stability.
-        if (Mathf.Abs(Vector2.Dot(perp.normalized, Vector2.up)) < 0.01f && perp.x < 0f)
-            perp = -perp;
+        // When the lunge is nearly along restForward, both perps are sideways — pick a stable side.
+        Vector2 perpNorm = perp.normalized;
+        if (Mathf.Abs(Vector2.Dot(perpNorm, restForward)) < 0.01f)
+        {
+            Vector2 restRight = new Vector2(restForward.y, -restForward.x);
+            if (Vector2.Dot(perpNorm, restRight) < 0f)
+                perp = -perp;
+        }
 
         return mid + perp.normalized * height;
     }
