@@ -13,6 +13,8 @@ public class PlayerMovement : MonoBehaviour
 
 	public float horizontalMove = 0f;
 	bool jump = false;
+	bool jumpHeld = false;
+	bool forceFullJump = false;
 	bool dash = false;
 	public bool canMove = true;
 	public bool grounded { get; private set; }
@@ -52,6 +54,7 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         grounded = controller.m_Grounded;
+		jumpHeld = Input.GetButton("Jump");
 
         if (!canMove) { return; }
 
@@ -105,6 +108,7 @@ public class PlayerMovement : MonoBehaviour
     public void DoJump()
 	{
 		jump = true;
+		forceFullJump = true;
 	}
 
 	public void OnFall()
@@ -126,8 +130,11 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        controller.Move(horizontalMove * Time.fixedDeltaTime, jump, dash);
+		// Sample hold here so FixedUpdate always sees current keyboard/gamepad state.
+		jumpHeld = Input.GetButton("Jump");
+        controller.Move(horizontalMove * Time.fixedDeltaTime, jump, dash, jumpHeld, forceFullJump);
 		jump = false;
+		forceFullJump = false;
 		dash = false;
 	}
 

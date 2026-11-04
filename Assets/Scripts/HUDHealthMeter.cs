@@ -1,13 +1,11 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class HUDHealthMeter : MonoBehaviour
 {
     public bool isPlayer = false;
     [SerializeField] private GameObject[] healthMeterFilled;
+    [SerializeField] private GameObject[] healthMeterEmpty;
     [SerializeField] private SubzoneAudioManager subzoneAudioManager;
 
     private void Awake()
@@ -21,11 +19,21 @@ public class HUDHealthMeter : MonoBehaviour
 
     private void Start()
     {
-        // Set player health to current stat health when play starts
-        if (isPlayer && (PlayerStats.Health <= healthMeterFilled.Length) )
+        if (isPlayer)
         {
-            SetHealth(PlayerStats.Health);
+            RefreshFromPlayerStats();
         }
+    }
+
+    public void RefreshFromPlayerStats()
+    {
+        if (!isPlayer)
+        {
+            return;
+        }
+
+        SyncCapacitySlots(PlayerStats.HealthCapacity);
+        SetHealth(PlayerStats.Health);
     }
 
     public void FillMeter()
@@ -35,16 +43,51 @@ public class HUDHealthMeter : MonoBehaviour
 
     public void SetHealth(int health)
     {
-        for (int i = 0; i < health; i++)
+        int capacity = GetActiveCapacity();
+        health = Mathf.Clamp(health, 0, capacity);
+        for (int i = 0; i < healthMeterFilled.Length; i++)
         {
-            healthMeterFilled[i].SetActive(true);
+            healthMeterFilled[i].SetActive(i < health);
         }
+    }
+
+    private void SyncCapacitySlots(int capacity)
+    {
+        capacity = Mathf.Clamp(capacity, 0, healthMeterFilled.Length);
+
+        if (healthMeterEmpty != null)
+        {
+            for (int i = 0; i < healthMeterEmpty.Length; i++)
+            {
+                if (healthMeterEmpty[i] != null)
+                {
+                    healthMeterEmpty[i].SetActive(i < capacity);
+                }
+            }
+        }
+
+        for (int i = capacity; i < healthMeterFilled.Length; i++)
+        {
+            healthMeterFilled[i].SetActive(false);
+        }
+    }
+
+    private int GetActiveCapacity()
+    {
+        if (isPlayer)
+        {
+            return Mathf.Min(PlayerStats.HealthCapacity, healthMeterFilled.Length);
+        }
+
+        return healthMeterFilled.Length;
     }
 
     private IEnumerator Fill()
     {
-        foreach (GameObject bar in healthMeterFilled)
+        int capacity = GetActiveCapacity();
+        for (int i = 0; i < capacity; i++)
         {
+            GameObject bar = healthMeterFilled[i];
             if (bar.activeInHierarchy == false)
             {
                 yield return StartCoroutine(FillOne(bar));
@@ -57,18 +100,22 @@ public class HUDHealthMeter : MonoBehaviour
         yield return new WaitForSeconds(0.15f);
         if (!bar.activeInHierarchy)
         {
-            subzoneAudioManager.PlayArcadeJump();
+            if (subzoneAudioManager != null)
+            {
+                subzoneAudioManager.PlayArcadeJump();
+            }
             bar.SetActive(true);
         }
     }
 
     public void Increment(int number)
     {
-        foreach (GameObject bar in healthMeterFilled)
+        int capacity = GetActiveCapacity();
+        for (int i = 0; i < capacity; i++)
         {
-            if (bar.activeInHierarchy == false)
+            if (healthMeterFilled[i].activeInHierarchy == false)
             {
-                bar.SetActive(true);
+                healthMeterFilled[i].SetActive(true);
                 number--;
                 if (number == 0) { return; }
             }
@@ -77,7 +124,8 @@ public class HUDHealthMeter : MonoBehaviour
 
     public void Decrement(int number)
     {
-        for (int i = healthMeterFilled.Length; i-- > 0;)
+        int capacity = GetActiveCapacity();
+        for (int i = capacity; i-- > 0;)
         {
             if (healthMeterFilled[i].activeInHierarchy == true)
             {

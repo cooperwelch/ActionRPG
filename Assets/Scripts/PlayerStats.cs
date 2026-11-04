@@ -37,7 +37,7 @@ public static class PlayerStats
             Attack = 0;
             DefenseCapacity = 1;
             Defense = DefenseCapacity;
-            HealthCapacity = 14;
+            HealthCapacity = 6;
             Health = HealthCapacity;
             Initialized = true;
             PowerupDestroy = new List<string>();

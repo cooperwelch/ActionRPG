@@ -36,6 +36,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Subzone Intro Beach Debris.unity
     guid: abd16c393fa6847cd8e29037f952f222
   - enabled: 1
+    path: Assets/Scenes/Subzone Intro Sandy Path.unity
+    guid: 481ff1ddb39e242a5845b32dfc5a71b1
+  - enabled: 1
     path: Assets/Scenes/Subzone Intro Waterfall.unity
     guid: f00aee71904474f03b97fec4c25094d7
   - enabled: 1

@@ -283,12 +283,23 @@ public class Attack : MonoBehaviour, IDamageable
     private IEnumerator Die()
 	{
         playerMovement.Stop();
+		// Stick at land point: max friction + freeze X (Stop alone leaves noFriction slide).
+		controller.FreezeForDeath();
+		rigidBody.velocity = Vector2.zero;
         audioManager.PlayGameOver();
         dead = true;
 		isInvulnerable = true;
 		isDamaged = false;
 		shouldCheckGroundedForKnockback = false;
         animator.SetBool("IsDead", true);
+
+		// Grounded can lag contact by a physics step; clear any post-land residual.
+		for (int i = 0; i < 3; i++)
+		{
+			yield return new WaitForFixedUpdate();
+			rigidBody.velocity = Vector2.zero;
+		}
+
 		yield return new WaitForSeconds(4);
         GameManager.sharedInstance.ShowGameOver(SceneManager.GetActiveScene().name);
 	}

@@ -167,6 +167,14 @@ public class SubzoneHUD : MonoBehaviour
         }
     }
 
+    public void RefreshPlayerHealthMeter()
+    {
+        if (playerHealthMeter != null)
+        {
+            playerHealthMeter.RefreshFromPlayerStats();
+        }
+    }
+
     public void ReducePlayerHealthMeter(int amount)
     {
         if (playerHealthMeter != null)

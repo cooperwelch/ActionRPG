@@ -5,7 +5,9 @@ using UnityEngine.SceneManagement;
 
 public class CharacterController2D : MonoBehaviour
 {
-	[SerializeField] private float m_JumpForce = 400f;							// Amount of force added when the player jumps.
+	[SerializeField] private float m_JumpForce = 400f;							// Full jump force applied on press (HeroCharacter uses 900).
+	[SerializeField] private float m_JumpReleaseCutWindow = 0.2f;				// Early release within this time (while rising) cuts height.
+	[Range(0f, 1f)] [SerializeField] private float m_JumpReleaseVelocityMultiplier = 0.5f; // Multiplies upward speed on early release.
 	[Range(0, .3f)] [SerializeField] private float m_MovementSmoothing = .05f;	// How much to smooth out the movement
 	private bool m_AirControl = true;							// Whether or not a player can steer while jumping;
 	[SerializeField] private LayerMask m_WhatIsGround;							// A mask determining what is ground to the character
@@ -19,6 +21,10 @@ public class CharacterController2D : MonoBehaviour
 	private float limitFallSpeed = 15f; // Limit fall speed
 
 	private float postApexGravityMultiplier = 1f;
+	private bool m_IsVariableJumping;
+	private float m_JumpHoldTimer;
+	private float m_IgnoreGroundTimer;
+	private const float k_JumpGroundIgnoreTime = 0.15f;
 
 	//[SerializeField] private float m_DashForce = 25f;
 	private bool canDash = false;
@@ -42,6 +48,7 @@ public class CharacterController2D : MonoBehaviour
 	private float slopeSideAngle;
 	private float horizMovement;
 	private PlayerMovement playerMovement;
+	private bool frozenForDeath;
 
 	[Header("Events")]
 	[Space]
@@ -78,21 +85,36 @@ public class CharacterController2D : MonoBehaviour
 		bool wasGrounded = m_Grounded;
 		m_Grounded = false;
 
-		// The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
-		// This can be done using layers instead but Sample Assets will not overwrite your project settings.
-		Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
-		for (int i = 0; i < colliders.Length; i++)
+		if (m_IgnoreGroundTimer > 0f)
 		{
-			if (colliders[i].gameObject == gameObject)
-				continue;
-			if (!ShouldCountColliderForGround(colliders[i]))
-				continue;
-			m_Grounded = true;
-			break;
+			m_IgnoreGroundTimer -= Time.fixedDeltaTime;
+		}
+		else
+		{
+			// The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
+			// This can be done using layers instead but Sample Assets will not overwrite your project settings.
+			Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
+			for (int i = 0; i < colliders.Length; i++)
+			{
+				if (colliders[i].gameObject == gameObject)
+					continue;
+				if (!ShouldCountColliderForGround(colliders[i]))
+					continue;
+				m_Grounded = true;
+				break;
+			}
+
+			// Still rising = leave the ground; avoids canceling variable jump from residual overlap.
+			if (m_Grounded && m_Rigidbody2D.velocity.y > 0.01f)
+				m_Grounded = false;
 		}
 
 		if (m_Grounded && !wasGrounded)
+		{
+			m_IsVariableJumping = false;
+			m_JumpHoldTimer = 0f;
 			OnLandEvent.Invoke();
+		}
 
 		if (!m_Grounded)
 		{
@@ -186,7 +208,12 @@ public class CharacterController2D : MonoBehaviour
             Debug.DrawRay(hit.point, slopeNormalPerpendicular, Color.blue);
 
 			// Max friction while idle on slopes would cancel knockback if applied during hit stun.
-			if (playerMovement.isDamaged)
+			// Death freeze must stick on flat ground too (otherwise leftover knockback slides).
+			if (frozenForDeath)
+			{
+				capsuleCollider.sharedMaterial = maxFriction;
+			}
+			else if (playerMovement.isDamaged)
 			{
 				capsuleCollider.sharedMaterial = noFriction;
 			}
@@ -206,7 +233,16 @@ public class CharacterController2D : MonoBehaviour
 		capsuleCollider.sharedMaterial = noFriction;
 	}
 
-    public void Move(float move, bool jump, bool dash)
+	/// <summary>Pin horizontal motion on death land so knockback residual cannot slide.</summary>
+	public void FreezeForDeath()
+	{
+		frozenForDeath = true;
+		capsuleCollider.sharedMaterial = maxFriction;
+		m_Rigidbody2D.velocity = Vector2.zero;
+		m_Rigidbody2D.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
+	}
+
+    public void Move(float move, bool jump, bool dash, bool jumpHeld = false, bool forceFullJump = false)
 	{
 		horizMovement = move;
 
@@ -292,8 +328,46 @@ public class CharacterController2D : MonoBehaviour
                 }
 
 				m_Grounded = false;
+				m_IgnoreGroundTimer = k_JumpGroundIgnoreTime;
+				m_JumpHoldTimer = 0f;
 				m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
+
+				// Scripted jumps keep full height; player jumps can be cut on early release.
+				m_IsVariableJumping = !forceFullJump;
 			}
+
+			ApplyJumpReleaseCut(jumpHeld);
+		}
+	}
+
+	private void ApplyJumpReleaseCut(bool jumpHeld)
+	{
+		if (!m_IsVariableJumping)
+			return;
+
+		m_JumpHoldTimer += Time.fixedDeltaTime;
+
+		// Held through the cut window — committed to full jump height.
+		if (m_JumpHoldTimer >= m_JumpReleaseCutWindow)
+		{
+			m_IsVariableJumping = false;
+			return;
+		}
+
+		// Past apex (skip the takeoff frame; AddForce may not be in velocity yet).
+		if (m_JumpHoldTimer > Time.fixedDeltaTime && m_Rigidbody2D.velocity.y <= 0f)
+		{
+			m_IsVariableJumping = false;
+			return;
+		}
+
+		// Early release: cut once upward velocity is available.
+		if (!jumpHeld && m_Rigidbody2D.velocity.y > 0f)
+		{
+			m_Rigidbody2D.velocity = new Vector2(
+				m_Rigidbody2D.velocity.x,
+				m_Rigidbody2D.velocity.y * m_JumpReleaseVelocityMultiplier);
+			m_IsVariableJumping = false;
 		}
 	}
 

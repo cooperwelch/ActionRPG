@@ -216,6 +216,7 @@ MonoBehaviour:
   - {fileID: 6557480890367280188}
   - {fileID: 186740530167460136}
   - {fileID: 1730204601574875154}
+  healthMeterEmpty: []
   subzoneAudioManager: {fileID: 0}
 --- !u!1 &256532315828891269
 GameObject:
@@ -3995,7 +3996,7 @@ GameObject:
   - component: {fileID: 2611888467811123960}
   - component: {fileID: 693204604681452273}
   m_Layer: 5
-  m_Name: Health Bar Empty 12
+  m_Name: Health Bar Empty 13
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6028,6 +6029,21 @@ MonoBehaviour:
   - {fileID: 256532315828891269}
   - {fileID: 5931762199206963769}
   - {fileID: 4858050018937652413}
+  healthMeterEmpty:
+  - {fileID: 2929847944465002029}
+  - {fileID: 2139933935539141397}
+  - {fileID: 5407386887575369123}
+  - {fileID: 5447659991095748441}
+  - {fileID: 805814056276279028}
+  - {fileID: 6358000636389643235}
+  - {fileID: 6584408779592669514}
+  - {fileID: 2203412345194354534}
+  - {fileID: 8586212300488921595}
+  - {fileID: 8514397871110726913}
+  - {fileID: 3860028844751924540}
+  - {fileID: 6751940938084128860}
+  - {fileID: 4663441266721011715}
+  - {fileID: 7624729115567213564}
   subzoneAudioManager: {fileID: 0}
 --- !u!1 &7025845417732580641
 GameObject:
@@ -6411,7 +6427,7 @@ GameObject:
   - component: {fileID: 1827703075648790335}
   - component: {fileID: 2206802819922471943}
   m_Layer: 5
-  m_Name: Health Bar Empty 13
+  m_Name: Health Bar Empty 14
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

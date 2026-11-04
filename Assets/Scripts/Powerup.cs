@@ -45,6 +45,11 @@ public class Powerup : MonoBehaviour
                     break;
                 case PowerupType.Health:
                     PlayerStats.UpgradeHealth(uniqueId);
+                    SubzoneHUD hud = FindObjectOfType<SubzoneHUD>();
+                    if (hud != null)
+                    {
+                        hud.RefreshPlayerHealthMeter();
+                    }
                     break;
             }
         }
