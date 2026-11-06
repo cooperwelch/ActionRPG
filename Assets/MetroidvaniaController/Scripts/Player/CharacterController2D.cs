@@ -24,6 +24,7 @@ public class CharacterController2D : MonoBehaviour
 	private bool m_IsVariableJumping;
 	private float m_JumpHoldTimer;
 	private float m_IgnoreGroundTimer;
+	private bool m_JumpAscending;
 	private const float k_JumpGroundIgnoreTime = 0.15f;
 
 	//[SerializeField] private float m_DashForce = 25f;
@@ -104,8 +105,12 @@ public class CharacterController2D : MonoBehaviour
 				break;
 			}
 
-			// Still rising = leave the ground; avoids canceling variable jump from residual overlap.
-			if (m_Grounded && m_Rigidbody2D.velocity.y > 0.01f)
+			// Only a real jump should ignore the floor while moving upward.
+			// Slope walking also has positive velocity.y and must stay grounded.
+			if (m_JumpAscending && m_Rigidbody2D.velocity.y <= 0.01f)
+				m_JumpAscending = false;
+
+			if (m_Grounded && m_JumpAscending)
 				m_Grounded = false;
 		}
 
@@ -328,6 +333,7 @@ public class CharacterController2D : MonoBehaviour
                 }
 
 				m_Grounded = false;
+				m_JumpAscending = true;
 				m_IgnoreGroundTimer = k_JumpGroundIgnoreTime;
 				m_JumpHoldTimer = 0f;
 				m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
