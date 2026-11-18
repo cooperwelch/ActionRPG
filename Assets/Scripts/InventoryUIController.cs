@@ -127,15 +127,15 @@ public class InventoryUIController : MonoBehaviour
             return false;
         }
 
-        int healed = item.Execute();
+        int amount = item.Execute();
         PlayerStats.RemoveAt(index);
 
-        if (healed > 0)
+        if (item.effectType == ItemEffectType.Heal && amount > 0)
         {
             SubzoneHUD hud = FindObjectOfType<SubzoneHUD>();
             if (hud != null)
             {
-                hud.IncreasePlayerHealthMeter(healed);
+                hud.IncreasePlayerHealthMeter(amount);
             }
         }
 

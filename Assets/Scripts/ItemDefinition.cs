@@ -2,7 +2,8 @@ using UnityEngine;
 
 public enum ItemEffectType
 {
-    Heal
+    Heal,
+    AddOre
 }
 
 [CreateAssetMenu(fileName = "ItemDefinition", menuName = "ScriptableObjects/Items/Item Definition")]
@@ -19,6 +20,7 @@ public class ItemDefinition : ScriptableObject
     public string inventoryFullMessage = "Inventory is full.";
     public ItemEffectType effectType = ItemEffectType.Heal;
     public int healAmount;
+    public int oreAmount;
 
     public string GetBlockedPurchaseMessage()
     {
@@ -42,6 +44,14 @@ public class ItemDefinition : ScriptableObject
         {
             case ItemEffectType.Heal:
                 return PlayerStats.Heal(healAmount);
+            case ItemEffectType.AddOre:
+                if (oreAmount <= 0)
+                {
+                    return 0;
+                }
+
+                PlayerStats.AddOre(oreAmount);
+                return oreAmount;
             default:
                 return 0;
         }

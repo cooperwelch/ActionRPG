@@ -195,6 +195,7 @@ MonoBehaviour:
   wakeTriggerDistance: 5
   attackTriggerDistance: 3
   triggerCenterOffset: {x: 0, y: -0.5}
+  facingFlipThreshold: 0.2
   emergeHopDistance: 2
   emergeHopHeight: 1.5
   sandEffectPrefab: {fileID: 8300000000000000041, guid: 10b598a6e2e44953927976d620cc0904, type: 3}

@@ -22,6 +22,7 @@ public class SubzoneSandScorpion : SubzoneEnemy
     [SerializeField] private float wakeTriggerDistance = 6f;
     [SerializeField] private float attackTriggerDistance = 2.5f;
     [SerializeField] private Vector2 triggerCenterOffset = new Vector2(0f, -0.5f);
+    [SerializeField] private float facingFlipThreshold = 0.2f;
 
     [Header("Emerge Hop")]
     [SerializeField] private float emergeHopDistance = 2f;
@@ -192,6 +193,7 @@ public class SubzoneSandScorpion : SubzoneEnemy
         base.OnValidate();
         wakeTriggerDistance = Mathf.Max(0.01f, wakeTriggerDistance);
         attackTriggerDistance = Mathf.Max(0.01f, attackTriggerDistance);
+        facingFlipThreshold = Mathf.Max(0f, facingFlipThreshold);
         emergeHopDistance = Mathf.Max(0.01f, emergeHopDistance);
         emergeHopHeight = Mathf.Max(0.01f, emergeHopHeight);
         walkSpeed = Mathf.Max(0f, walkSpeed);
@@ -236,7 +238,7 @@ public class SubzoneSandScorpion : SubzoneEnemy
 
     private void UpdateHiding()
     {
-        if (player == null)
+        if (!IsPlayerAlive())
             return;
 
         if (Vector2.Distance(GetTriggerCenter(), player.position) <= wakeTriggerDistance)
@@ -343,10 +345,8 @@ public class SubzoneSandScorpion : SubzoneEnemy
 
     private void UpdateWalking()
     {
-        if (player == null)
-            return;
-
-        FacePlayer();
+        if (IsPlayerAlive())
+            FacePlayer();
 
         _directionTimer += Time.deltaTime;
         if (_directionTimer >= directionReconsiderInterval)
@@ -355,7 +355,8 @@ public class SubzoneSandScorpion : SubzoneEnemy
             _approachPlayer = Random.value <= approachChance;
         }
 
-        if (_attackCooldownTimer <= 0f
+        if (IsPlayerAlive()
+            && _attackCooldownTimer <= 0f
             && Vector2.Distance(GetTriggerCenter(), player.position) <= attackTriggerDistance
             && IsGrounded())
         {
@@ -455,26 +456,40 @@ public class SubzoneSandScorpion : SubzoneEnemy
         return _approachPlayer ? towardPlayer : -towardPlayer;
     }
 
+    private bool IsPlayerAlive()
+    {
+        return player != null && PlayerStats.Health > 0;
+    }
+
+    private float GetFacingMoveDirection()
+    {
+        // Positive localScale.x faces left (same convention as Grasshopper).
+        return transform.localScale.x >= 0f ? -1f : 1f;
+    }
+
     private float GetDirectionTowardPlayer()
     {
-        if (player == null)
-            // Positive localScale.x faces left (same convention as Grasshopper).
-            return transform.localScale.x >= 0f ? -1f : 1f;
+        if (!IsPlayerAlive())
+            return GetFacingMoveDirection();
 
         float deltaX = player.position.x - transform.position.x;
-        if (Mathf.Abs(deltaX) < 0.001f)
-            return transform.localScale.x >= 0f ? -1f : 1f;
+        if (Mathf.Abs(deltaX) < facingFlipThreshold)
+            return GetFacingMoveDirection();
 
         return Mathf.Sign(deltaX);
     }
 
     private void FacePlayer()
     {
-        if (player == null)
+        if (!IsPlayerAlive())
             return;
 
         // Positive localScale.x faces left — match Grasshopper.
         float direction = player.position.x - transform.position.x;
+        // Deadband avoids rapid flipping when nearly overlapping the player's X.
+        if (Mathf.Abs(direction) < facingFlipThreshold)
+            return;
+
         if ((direction > 0f && transform.localScale.x > 0f) ||
             (direction < 0f && transform.localScale.x < 0f))
         {
