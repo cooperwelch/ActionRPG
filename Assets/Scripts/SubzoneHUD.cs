@@ -24,10 +24,6 @@ public class SubzoneHUD : MonoBehaviour
     private void Awake()
     {
         ApplyHudChromeVisibility(false);
-        if (hudVisibleWithMenuOnly && bossHealthMeter != null)
-        {
-            bossHealthMeter.gameObject.SetActive(false);
-        }
     }
 
     private void Start()

@@ -20,6 +20,8 @@ public class Cyclops : MonoBehaviour, IDamageable
     [SerializeField] private SandWave sandWave;
     [SerializeField] private Transform swipeAttackPoint;
     [SerializeField] private DamageFlash damageFlash;
+    [SerializeField] private float swipeLungeDistance = 3f;
+    [SerializeField] private float swipeLungeDuration = 0.375f;
 
     private Animator _animator;
     private Rigidbody2D _rb;
@@ -28,6 +30,10 @@ public class Cyclops : MonoBehaviour, IDamageable
     private SpriteRenderer _spriteRenderer;
     private bool isAttacking = false;
     private bool isKneeling = false;
+    private bool isLunging = false;
+    private float swipeLungeDirection = 0f;
+    private float swipeLungeElapsed = 0f;
+    private float swipeLungeBaseSpeed = 0f;
     private Coroutine kneelFlash;
     private Collider2D _collider;
     private const int PLAYER_COLLISION_LAYER = 1;
@@ -49,6 +55,11 @@ public class Cyclops : MonoBehaviour, IDamageable
     // Update is called once per frame
     void Update()
     {
+        if (isAttacking)
+        {
+            return;
+        }
+
         if ((playerTransform.position.x > transform.position.x) && transform.localScale.x > 0)
         {
             FlipSprite();
@@ -58,9 +69,31 @@ public class Cyclops : MonoBehaviour, IDamageable
         }
     }
 
+    private void FixedUpdate()
+    {
+        if (!isLunging)
+        {
+            return;
+        }
+
+        swipeLungeElapsed += Time.fixedDeltaTime;
+        float duration = Mathf.Max(0.01f, swipeLungeDuration);
+        float t = Mathf.Clamp01(swipeLungeElapsed / duration);
+        // Derivative of cubic ease-out (1 - (1-t)^3) => 3(1-t)^2: fast start, ease to stop.
+        float easeOutSpeedFactor = 3f * (1f - t) * (1f - t);
+        float speed = swipeLungeBaseSpeed * easeOutSpeedFactor;
+        _rb.velocity = new Vector2(swipeLungeDirection * speed, _rb.velocity.y);
+
+        if (t >= 1f)
+        {
+            isLunging = false;
+            _rb.velocity = Vector2.zero;
+        }
+    }
+
     public void Move(float xSpeed)
     {
-        if (shouldWalk)
+        if (shouldWalk && !isLunging)
         {
             _animator.SetBool("isWalking", true);
             _rb.velocity = new Vector2(xSpeed, _rb.velocity.y);
@@ -137,21 +170,44 @@ public class Cyclops : MonoBehaviour, IDamageable
     private void Swipe()
     {
         shouldWalk = false;
+        isLunging = false;
         _rb.velocity = Vector2.zero;
         _animator.SetTrigger("swipe");
-        StartCoroutine(SwipeAttack());
     }
 
-    private IEnumerator SwipeAttack()
+    // Animation event: first active swipe frame (after telegraph)
+    public void BeginSwipeLunge()
     {
-        yield return new WaitForSeconds(0.2f);
         audioManager.PlayAttack();
-        yield return new WaitForSeconds(0.3f);
-        SwipeMeleeAttack();
-        yield return new WaitForSeconds(1.0f);
+        swipeLungeDirection = Mathf.Sign(playerTransform.position.x - transform.position.x);
+        if (swipeLungeDirection == 0f)
+        {
+            swipeLungeDirection = -Mathf.Sign(transform.localScale.x);
+        }
+
+        float duration = Mathf.Max(0.01f, swipeLungeDuration);
+        swipeLungeBaseSpeed = swipeLungeDistance / duration;
+        swipeLungeElapsed = 0f;
+        isLunging = true;
+    }
+
+    // Animation event: swipe recovery — resume walking/cleanup only.
+    // Lunge motion is stopped by swipeLungeDuration + the ease-out curve.
+    public void EndSwipeLunge()
+    {
+        StartCoroutine(ResumeWalkingAfterSwipe());
+    }
+
+    private IEnumerator ResumeWalkingAfterSwipe()
+    {
+        while (isLunging)
+        {
+            yield return null;
+        }
         StartCoroutine(ResumeWalking());
     }
 
+    // Animation event: active hit frame during swipe
     public void SwipeMeleeAttack()
     {
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(
@@ -192,6 +248,8 @@ public class Cyclops : MonoBehaviour, IDamageable
     public void Die()
     {
         shouldWalk = false;
+        isLunging = false;
+        isAttacking = false;
         _rb.velocity = Vector2.zero;
         _animator.SetTrigger("death");
     }

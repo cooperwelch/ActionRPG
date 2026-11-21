@@ -19647,6 +19647,8 @@ MonoBehaviour:
   sandWave: {fileID: 5204612805808159933}
   swipeAttackPoint: {fileID: 5170237723780854345}
   damageFlash: {fileID: 5384957030668516710}
+  swipeLungeDistance: 1.6
+  swipeLungeDuration: 0.4
 --- !u!70 &898497241590018784
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
