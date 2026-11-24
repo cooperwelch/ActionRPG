@@ -67,6 +67,7 @@ public class SeaSerpentBossController : MonoBehaviour
         if (isRunning) return;
 
         isRunning = true;
+        health.IsVulnerable = true;
 
         ChangeState(new SeaSerpentBossIdleState(this));
     }
@@ -225,6 +226,7 @@ public class SeaSerpentBossDeadState : ISeaSerpentBossState
     public void Enter()
     {
         boss.Motor.StopIdle();
+        boss.AnimatorBridge.SetBiteHitboxActive(false);
         Debug.Log("Boss: Dead");
     }
 

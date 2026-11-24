@@ -6,6 +6,7 @@ public class SeaSerpentBossAnimatorBridge : MonoBehaviour
 {
     [SerializeField] private Animator animator;
     [SerializeField] private SpriteRenderer head;
+    [SerializeField] private SeaSerpentBossBiteHitbox biteHitbox;
 
     private bool biteFinished;
     private int sortingOrder;
@@ -13,6 +14,7 @@ public class SeaSerpentBossAnimatorBridge : MonoBehaviour
     private void Awake()
     {
         sortingOrder = head.sortingOrder;
+        if (biteHitbox == null) biteHitbox = GetComponentInChildren<SeaSerpentBossBiteHitbox>(true);
     }
 
     public void PlayBite()
@@ -27,9 +29,26 @@ public class SeaSerpentBossAnimatorBridge : MonoBehaviour
         return biteFinished;
     }
 
+    // Animation event (seaserpent_bite): head starts lunging down.
+    public void BiteHitboxOn()
+    {
+        SetBiteHitboxActive(true);
+    }
+
+    // Animation event (seaserpent_bite): head starts pulling back up.
+    public void BiteHitboxOff()
+    {
+        SetBiteHitboxActive(false);
+    }
+
+    public void SetBiteHitboxActive(bool active)
+    {
+        if (biteHitbox != null) biteHitbox.SetActive(active);
+    }
+
     public void OnBiteEnd()
     {
-        Debug.Log("OnBiteAnimationFinished");
+        SetBiteHitboxActive(false);
         StartCoroutine(Complete());
     }
 

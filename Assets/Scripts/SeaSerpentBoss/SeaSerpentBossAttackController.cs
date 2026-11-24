@@ -34,6 +34,7 @@ public class SeaSerpentBossAttackController : MonoBehaviour
         }
 
         attackRunning = false;
+        boss.AnimatorBridge.SetBiteHitboxActive(false);
     }
 
     private IEnumerator BiteRoutine(Action onComplete)

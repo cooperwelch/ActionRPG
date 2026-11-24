@@ -19,6 +19,30 @@ public class SeaSerpentBossFightDirector : MonoBehaviour
 
     private bool hasStarted;
 
+    private void OnEnable()
+    {
+        if (boss != null && boss.Health != null)
+        {
+            boss.Health.OnHealthChanged += HandleBossHealthChanged;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (boss != null && boss.Health != null)
+        {
+            boss.Health.OnHealthChanged -= HandleBossHealthChanged;
+        }
+    }
+
+    private void HandleBossHealthChanged(int current, int max)
+    {
+        if (bossHealthBarUI != null)
+        {
+            bossHealthBarUI.SetHealth(current);
+        }
+    }
+
     public void StartFight()
     {
         if (hasStarted) return;
