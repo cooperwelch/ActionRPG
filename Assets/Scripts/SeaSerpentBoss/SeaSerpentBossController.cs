@@ -17,6 +17,10 @@ public class SeaSerpentBossController : MonoBehaviour
     [Header("Timing")]
     [SerializeField] private float idleDuration = 2.0f;
 
+    [Header("Attack Selection")]
+    [Range(0f, 1f)]
+    [SerializeField] private float spitChance = 0.5f;
+
     private ISeaSerpentBossState currentState;
 
     private bool isRunning = false;
@@ -29,6 +33,7 @@ public class SeaSerpentBossController : MonoBehaviour
     public Transform LeftAnchor => leftAnchor;
     public Transform RightAnchor => rightAnchor;
     public float IdleDuration => idleDuration;
+    public float SpitChance => spitChance;
 
     private void Awake()
     {
@@ -119,6 +124,12 @@ public class SeaSerpentBossIdleState : ISeaSerpentBossState
 
         if (timer <= 0f)
         {
+            if (Random.value < boss.SpitChance)
+            {
+                boss.ChangeState(new SeaSerpentBossSpitState(boss));
+                return;
+            }
+
             Vector3 target = boss.GetRandomSideTarget();
             boss.ChangeState(new SeaSerpentBossMoveState(boss, target));
         }
@@ -193,6 +204,43 @@ public class SeaSerpentBossAttackState : ISeaSerpentBossState
         finished = false;
         boss.Attacks.StartBiteAttack(OnAttackComplete);
         Debug.Log("Boss: Bite Attack");
+    }
+
+    public void Tick()
+    {
+        if (finished)
+        {
+            boss.ChangeState(new SeaSerpentBossIdleState(boss));
+        }
+    }
+
+    public void Exit()
+    {
+        boss.Attacks.CancelAttack();
+    }
+
+    private void OnAttackComplete()
+    {
+        finished = true;
+    }
+}
+
+// Moves to one end of the ship and spits a volley of acid across the deck.
+public class SeaSerpentBossSpitState : ISeaSerpentBossState
+{
+    private readonly SeaSerpentBossController boss;
+    private bool finished;
+
+    public SeaSerpentBossSpitState(SeaSerpentBossController boss)
+    {
+        this.boss = boss;
+    }
+
+    public void Enter()
+    {
+        finished = false;
+        boss.Attacks.StartSpitAttack(OnAttackComplete);
+        Debug.Log("Boss: Spit Attack");
     }
 
     public void Tick()
