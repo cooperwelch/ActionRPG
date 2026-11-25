@@ -248,6 +248,8 @@ public class TitleScreenUI : MonoBehaviour
             print("No fader object specified on AdvanceScene script");
         }
 
+        // Fresh run: wipe any stats/progress left over from a previous playthrough this session.
+        GameState.NewGame();
         SceneManager.LoadScene(nextSceneName);
 
         yield return null;

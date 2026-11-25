@@ -28,8 +28,7 @@ public class SubzoneEntrance : MonoBehaviour
             Vector3 encounterPosition = usePositionOverride ?
                 positionOverride : gameObject.transform.position;
             OverworldSubzoneContainer.AddEncounter(
-                encounterPosition.x,
-                encounterPosition.y - 1, // Offset player from last encounter so we don't auto-collide again.
+                (Vector2)encounterPosition + Vector2.down, // Offset player from last encounter so we don't auto-collide again.
                 subzone,
                 OverworldSubzoneContainer.PlayerDirection.Down
             );
@@ -37,8 +36,7 @@ public class SubzoneEntrance : MonoBehaviour
             if (usesubzoneLevelStartPositionOverride)
             {
                 OverworldSubzoneContainer.AddSubzoneStartPosition(
-                    subzoneLevelStartPositionOverride.x,
-                    subzoneLevelStartPositionOverride.y,
+                    subzoneLevelStartPositionOverride,
                     subzoneLevelStartDirectionOverride
                 );
             }

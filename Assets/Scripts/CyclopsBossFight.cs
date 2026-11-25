@@ -30,7 +30,6 @@ public class CyclopsBossFight : MonoBehaviour
         _bossFightStartTrigger = GetComponent<BoxCollider2D>();
         originalVirtualCameraFollow = virtualCamera.Follow;
 
-        PlayerStats.Initialize();
         if (PlayerStats.IsCyclopsDefeated)
         {
             ApplyDefeatedState();

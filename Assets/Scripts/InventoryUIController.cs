@@ -42,7 +42,6 @@ public class InventoryUIController : MonoBehaviour
 
     public void EnsureSlots()
     {
-        PlayerStats.Initialize();
         while (slots.Count < PlayerStats.InventoryCapacity)
         {
             InventorySlotRow row = Instantiate(slotPrefab, slotContainer);
@@ -59,7 +58,6 @@ public class InventoryUIController : MonoBehaviour
     public void Refresh(int focusedIndex, bool showDescription)
     {
         EnsureSlots();
-        PlayerStats.Initialize();
 
         for (int i = 0; i < slots.Count; i++)
         {

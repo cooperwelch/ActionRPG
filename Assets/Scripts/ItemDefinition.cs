@@ -24,7 +24,6 @@ public class ItemDefinition : ScriptableObject
 
     public string GetBlockedPurchaseMessage()
     {
-        PlayerStats.Initialize();
         if (PlayerStats.Denarius < cost)
         {
             return unaffordableMessage;

@@ -13,7 +13,6 @@ public class CraftingBench : MonoBehaviour
 
     private void Awake()
     {
-        PlayerStats.Initialize();
         craftingUIController = FindObjectOfType<CraftingUIController>();
 
         if (toolTipIcon != null)

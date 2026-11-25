@@ -62,7 +62,6 @@ public class EquipmentUIController : MonoBehaviour
 
     public void Refresh(int focusedRow, int focusedColumn, bool hasFocus)
     {
-        PlayerStats.Initialize();
         PlayerStats.EnsureMeleeWeaponsList();
         CacheControllers();
         EnsureSlots();
@@ -98,7 +97,6 @@ public class EquipmentUIController : MonoBehaviour
 
     public bool TryEquipFocused(int focusedRow, int focusedColumn)
     {
-        PlayerStats.Initialize();
         CacheControllers();
 
         if (focusedColumn < 0 || focusedColumn >= SlotsPerRow)

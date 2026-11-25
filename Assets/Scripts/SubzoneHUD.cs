@@ -28,7 +28,6 @@ public class SubzoneHUD : MonoBehaviour
 
     private void Start()
     {
-        PlayerStats.Initialize();
         if (weaponCatalog == null)
         {
             Debug.LogWarning("SubzoneHUD: Weapon Catalog is not assigned.");

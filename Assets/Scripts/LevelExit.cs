@@ -131,8 +131,7 @@ public class LevelExit : MonoBehaviour
         if (usePositionOverride)
         {
             OverworldSubzoneContainer.AddEncounter(
-                levelExitOverworldPositionOverride.x,
-                levelExitOverworldPositionOverride.y,
+                levelExitOverworldPositionOverride,
                 subzone,
                 overworldDirectionOverride
             );
@@ -141,8 +140,7 @@ public class LevelExit : MonoBehaviour
         if (useSubzoneLevelStartPositionOverride)
         {
             OverworldSubzoneContainer.AddSubzoneStartPosition(
-                subzoneLevelStartPositionOverride.x,
-                subzoneLevelStartPositionOverride.y,
+                subzoneLevelStartPositionOverride,
                 subzoneLevelStartDirectionOverride
             );
         }

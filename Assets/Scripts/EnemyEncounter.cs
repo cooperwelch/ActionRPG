@@ -22,8 +22,7 @@ public class EnemyEncounter : MonoBehaviour
             audioManager.PlayEnemyEncounter();
             Transform movePoint = enemyMovement.movePoint;
             OverworldSubzoneContainer.AddEncounter(
-                movePoint.position.x,
-                movePoint.position.y - 1, // Offset player from last encounter so we don't auto-collide again.
+                (Vector2)movePoint.position + Vector2.down, // Offset player from last encounter so we don't auto-collide again.
                 subzoneName,
                 OverworldSubzoneContainer.PlayerDirection.Down
             );

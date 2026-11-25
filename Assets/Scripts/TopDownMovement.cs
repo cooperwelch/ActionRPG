@@ -17,10 +17,7 @@ public class TopDownMovement : MonoBehaviour
     {
         // Set position to last encounter
         rigidBody = gameObject.GetComponent<Rigidbody2D>();
-        rigidBody.transform.position = new Vector3(
-            OverworldSubzoneContainer.LastEncounterPosition.Item1,
-            OverworldSubzoneContainer.LastEncounterPosition.Item2
-        );
+        rigidBody.transform.position = OverworldSubzoneContainer.LastEncounterPosition;
 
         animator = gameObject.GetComponent<Animator>();
         animator.SetFloat("speed", 1);

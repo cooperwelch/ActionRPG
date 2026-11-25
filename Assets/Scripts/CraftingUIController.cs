@@ -43,7 +43,6 @@ public class CraftingUIController : MonoBehaviour
 
     public void Open()
     {
-        PlayerStats.Initialize();
         selectedIndex = 0;
         CloseMessageImmediate();
         // Ignore held Up from opening the bench until the axis is released.

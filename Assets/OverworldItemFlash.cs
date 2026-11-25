@@ -8,7 +8,6 @@ public class OverworldItemFlash : MonoBehaviour
 
     private void Awake()
     {
-        PlayerStats.Initialize();
         if (weapon != null && PlayerStats.SecondaryWeapons.Contains(weapon.name))
         {
             gameObject.SetActive(false);

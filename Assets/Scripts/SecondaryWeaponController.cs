@@ -21,7 +21,6 @@ public class SecondaryWeaponController : MonoBehaviour
 
     private void Awake()
     {
-        PlayerStats.Initialize();
         if (weaponCatalog == null)
         {
             Debug.LogWarning("SecondaryWeaponController: Weapon Catalog is not assigned.");

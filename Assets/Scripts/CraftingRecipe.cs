@@ -41,7 +41,6 @@ public class CraftingRecipe : ScriptableObject
 
     public bool MeetsRequirements()
     {
-        PlayerStats.Initialize();
 
         foreach (CraftRequirement requirement in requirements)
         {
@@ -56,7 +55,6 @@ public class CraftingRecipe : ScriptableObject
 
     public bool CanAfford()
     {
-        PlayerStats.Initialize();
         return PlayerStats.Ore >= oreCost;
     }
 
@@ -67,7 +65,6 @@ public class CraftingRecipe : ScriptableObject
             return false;
         }
 
-        PlayerStats.Initialize();
         return PlayerStats.GetSecondaryWeaponAmmo(targetSecondaryWeapon.name) >= targetSecondaryWeapon.maxAmmo;
     }
 

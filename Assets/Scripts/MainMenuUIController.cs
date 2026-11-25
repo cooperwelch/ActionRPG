@@ -91,7 +91,6 @@ public class MainMenuUIController : MonoBehaviour
 
     public void Open()
     {
-        PlayerStats.Initialize();
         panelRoot.SetActive(true);
         SetItemsVisible(false);
         SetEquipmentVisible(false);

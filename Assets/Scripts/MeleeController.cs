@@ -42,9 +42,6 @@ public class MeleeController : MonoBehaviour
 
     private void Awake()
     {
-        // TODO: Elliott remove this
-        PlayerStats.Initialize();
-
         if (weaponCatalog == null)
         {
             Debug.LogWarning("MeleeController: Weapon Catalog is not assigned.");

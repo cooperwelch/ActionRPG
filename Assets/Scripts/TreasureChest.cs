@@ -28,7 +28,6 @@ public class TreasureChest : MonoBehaviour
 
     private void Awake()
     {
-        PlayerStats.Initialize();
 
         spriteRenderer = GetComponent<SpriteRenderer>();
         dialogueTrigger = GetComponent<DialogueSystemTrigger>();

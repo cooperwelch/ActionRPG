@@ -1,53 +1,42 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+// Public API for overworld <-> subzone transition data.
+// The data itself lives in GameState.Current.world, which is created automatically on first use.
 public class OverworldSubzoneContainer
 {
     public enum PlayerDirection { Up, Down, Left, Right }
-    public static (float, float) LastEncounterPosition { get; private set; }
-    public static PlayerDirection LastEncounterDirection { get; private set; }
-    public static string LastEncounterSubzoneName { get; private set; }
 
-    public static (float, float) SubzoneLevelStartPosition { get; private set; }
-    public static PlayerDirection SubzoneLevelStartDirection { get; private set; }
-    public static bool UseSubzoneLevelStartPosition { get; set; }
+    private static WorldState W => GameState.Current.world;
 
-    public static bool HasShownWreckedShipIntro { get; set; }
+    public static Vector2 LastEncounterPosition => W.lastEncounterPosition;
+    public static PlayerDirection LastEncounterDirection => W.lastEncounterDirection;
+    public static string LastEncounterSubzoneName => W.lastEncounterSubzoneName;
 
-    private static bool Initialized;
-
-    public static void AddEncounter(float x, float y, string subzoneName, PlayerDirection direction)
+    public static Vector2 SubzoneLevelStartPosition => W.subzoneLevelStartPosition;
+    public static PlayerDirection SubzoneLevelStartDirection => W.subzoneLevelStartDirection;
+    public static bool UseSubzoneLevelStartPosition
     {
-        LastEncounterPosition = (x, y);
-        LastEncounterSubzoneName = subzoneName;
-        LastEncounterDirection = direction;
+        get => W.useSubzoneLevelStartPosition;
+        set => W.useSubzoneLevelStartPosition = value;
     }
 
-    public static void AddSubzoneStartPosition(float x, float y, PlayerDirection direction)
+    public static bool HasShownWreckedShipIntro
     {
-        SubzoneLevelStartPosition = (x, y);
-        SubzoneLevelStartDirection = direction;
-        UseSubzoneLevelStartPosition = true;
+        get => W.hasShownWreckedShipIntro;
+        set => W.hasShownWreckedShipIntro = value;
     }
 
-    public static void Initialize()
+    public static void AddEncounter(Vector2 position, string subzoneName, PlayerDirection direction)
     {
-        if (!Initialized)
-        {
-            LastEncounterPosition = (6.3f, -2.8f); // Start near wrecked ship (default)
-            // LastEncounterPosition = (21.54f, 16.3f); // Start near Intro Forest South
-            // LastEncounterPosition = (16.5f, 26f); // Start near Intro Forest North
-            // LastEncounterPosition = (16.5f, 32.5f); // Start near Boat
-            LastEncounterSubzoneName = "";
-            LastEncounterDirection = PlayerDirection.Down;
-
-            Initialized = true;
-        }
+        W.lastEncounterPosition = position;
+        W.lastEncounterSubzoneName = subzoneName;
+        W.lastEncounterDirection = direction;
     }
 
-    public static void Reset()
+    public static void AddSubzoneStartPosition(Vector2 position, PlayerDirection direction)
     {
-        Initialized = false;
+        W.subzoneLevelStartPosition = position;
+        W.subzoneLevelStartDirection = direction;
+        W.useSubzoneLevelStartPosition = true;
     }
 }

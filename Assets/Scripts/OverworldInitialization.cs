@@ -9,8 +9,6 @@ public class OverworldInitialization : MonoBehaviour
 
     private void Awake()
     {
-        PlayerStats.Initialize();
-        OverworldSubzoneContainer.Initialize();
 
         OverworldDestroy();
     }

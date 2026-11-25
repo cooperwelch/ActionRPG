@@ -16,10 +16,8 @@ public class GridMovement : MonoBehaviour
     {
         // Set position to last encounter
         rigidBody = gameObject.GetComponent<Rigidbody2D>();
-        rigidBody.transform.position = new Vector3(
-            OverworldSubzoneContainer.LastEncounterPosition.Item1,
-            OverworldSubzoneContainer.LastEncounterPosition.Item2 - 1 // Offset player from last encounter so we don't auto-collide again.
-        );
+        // Offset player from last encounter so we don't auto-collide again.
+        rigidBody.transform.position = OverworldSubzoneContainer.LastEncounterPosition + Vector2.down;
 
         movePoint = transform.Find("MovePoint");
         movePoint.parent = null;

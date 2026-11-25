@@ -1,125 +1,90 @@
 using System.Collections.Generic;
 using UnityEngine;
+
+// Public API for the player's carried-over stats, inventory and progress.
+// The data itself lives in GameState.Current.player, which is created automatically on first use.
 public static class PlayerStats
 {
-    public static int Attack { get; private set; }
-    public static int Defense { get; private set; }
-    public static int DefenseCapacity { get; private set; }
-    public static int Health { get; private set; }
-    public static int HealthCapacity { get; private set; }
-    public static string MeleeWeapon { get; private set; }
-    public static List<string> MeleeWeapons { get; private set; }
-    public static string SecondaryWeapon { get; private set; }
-    public static List<string> SecondaryWeapons { get; private set; }
-    public static int Ore { get; private set; }
-    public static int Denarius { get; private set; }
-    public static bool HasCraftingHammer { get; private set; }
-    public static int CraftingHammerLevel { get; private set; }
-    public static bool IsCyclopsDefeated { get; private set; }
-    public const int DefaultInventoryCapacity = 4;
-    public static int InventoryCapacity { get; private set; }
-    public static List<ItemDefinition> Inventory { get; private set; }
+    private static PlayerState S => GameState.Current.player;
 
-    private static Dictionary<string, int> SecondaryWeaponAmmo;
+    public static int Attack => S.attack;
+    public static int Defense => S.defense;
+    public static int DefenseCapacity => S.defenseCapacity;
+    public static int Health => S.health;
+    public static int HealthCapacity => S.healthCapacity;
+    public static string MeleeWeapon => S.meleeWeapon;
+    public static List<string> MeleeWeapons => S.meleeWeapons;
+    public static string SecondaryWeapon => S.secondaryWeapon;
+    public static List<string> SecondaryWeapons => S.secondaryWeapons;
+    public static int Ore => S.ore;
+    public static int Denarius => S.denarius;
+    public static bool HasCraftingHammer => S.hasCraftingHammer;
+    public static int CraftingHammerLevel => S.craftingHammerLevel;
+    public static bool IsCyclopsDefeated => S.isCyclopsDefeated;
+    public const int DefaultInventoryCapacity = PlayerState.DefaultInventoryCapacity;
+    public static int InventoryCapacity => S.inventoryCapacity;
+    public static List<ItemDefinition> Inventory => S.inventory;
 
-    public static List<string> PowerupDestroy { get; private set; }
+    public static List<string> PowerupDestroy => S.powerupDestroy;
 
-    public static List<string> OpenedTreasureChests { get; private set; }
+    public static List<string> OpenedTreasureChests => S.openedTreasureChests;
 
-    public static List<string> OverworldDestroyList { get; private set; }
-
-    private static bool Initialized;
-
-    public static void Initialize()
-    {
-        if (!Initialized)
-        {
-            Attack = 0;
-            DefenseCapacity = 1;
-            Defense = DefenseCapacity;
-            HealthCapacity = 6;
-            Health = HealthCapacity;
-            Initialized = true;
-            PowerupDestroy = new List<string>();
-            OpenedTreasureChests = new List<string>();
-            OverworldDestroyList = new List<string>();
-            // Default unarmed primary — persists across scenes; Fists always acquired
-            MeleeWeapons = new List<string> { MeleeController.UnarmedWeaponName };
-            MeleeWeapon = MeleeController.UnarmedWeaponName;
-            Attack = 1;
-            SecondaryWeapons = new List<string>();
-            SecondaryWeapon = null;
-            SecondaryWeaponAmmo = new Dictionary<string, int>();
-            //Ore = 99;
-            Denarius = 25;
-            HasCraftingHammer = false;
-            CraftingHammerLevel = 1;
-            IsCyclopsDefeated = false;
-            InventoryCapacity = DefaultInventoryCapacity;
-            Inventory = CreateEmptyInventory(InventoryCapacity);
-        }
-    }
+    public static List<string> OverworldDestroyList => S.overworldDestroyList;
 
     public static void AcquireCraftingHammer()
     {
-        Initialize();
-        HasCraftingHammer = true;
+        S.hasCraftingHammer = true;
         Debug.Log("AcquireCraftingHammer");
     }
 
     public static bool SpendOre(int amount)
     {
-        Initialize();
-        if (amount <= 0 || Ore < amount)
+        if (amount <= 0 || S.ore < amount)
         {
             return false;
         }
 
-        Ore -= amount;
+        S.ore -= amount;
         return true;
     }
 
     public static void AddOre(int amount)
     {
-        Initialize();
         if (amount <= 0)
         {
             return;
         }
 
-        Ore += amount;
+        S.ore += amount;
     }
 
     public static void AddDenarius(int amount)
     {
-        Initialize();
         if (amount <= 0)
         {
             return;
         }
 
-        Denarius += amount;
+        S.denarius += amount;
     }
 
     public static bool SpendDenarius(int amount)
     {
-        Initialize();
-        if (amount <= 0 || Denarius < amount)
+        if (amount <= 0 || S.denarius < amount)
         {
             return false;
         }
 
-        Denarius -= amount;
+        S.denarius -= amount;
         return true;
     }
 
     public static bool HasEmptySlot()
     {
-        Initialize();
         EnsureInventory();
-        for (int i = 0; i < InventoryCapacity; i++)
+        for (int i = 0; i < S.inventoryCapacity; i++)
         {
-            if (Inventory[i] == null)
+            if (S.inventory[i] == null)
             {
                 return true;
             }
@@ -130,18 +95,17 @@ public static class PlayerStats
 
     public static bool TryAddItem(ItemDefinition item)
     {
-        Initialize();
         EnsureInventory();
         if (item == null)
         {
             return false;
         }
 
-        for (int i = 0; i < InventoryCapacity; i++)
+        for (int i = 0; i < S.inventoryCapacity; i++)
         {
-            if (Inventory[i] == null)
+            if (S.inventory[i] == null)
             {
-                Inventory[i] = item;
+                S.inventory[i] = item;
                 return true;
             }
         }
@@ -151,148 +115,129 @@ public static class PlayerStats
 
     public static ItemDefinition GetItemAt(int index)
     {
-        Initialize();
         EnsureInventory();
-        if (index < 0 || index >= InventoryCapacity)
+        if (index < 0 || index >= S.inventoryCapacity)
         {
             return null;
         }
 
-        return Inventory[index];
+        return S.inventory[index];
     }
 
     public static bool RemoveAt(int index)
     {
-        Initialize();
         EnsureInventory();
-        if (index < 0 || index >= InventoryCapacity || Inventory[index] == null)
+        if (index < 0 || index >= S.inventoryCapacity || S.inventory[index] == null)
         {
             return false;
         }
 
-        Inventory[index] = null;
+        S.inventory[index] = null;
         CompactInventory();
         return true;
     }
 
     public static int Heal(int amount)
     {
-        Initialize();
         if (amount <= 0)
         {
             return 0;
         }
 
-        int before = Health;
-        Health = Mathf.Min(HealthCapacity, Health + amount);
-        return Health - before;
-    }
-
-    private static List<ItemDefinition> CreateEmptyInventory(int capacity)
-    {
-        List<ItemDefinition> slots = new List<ItemDefinition>(capacity);
-        for (int i = 0; i < capacity; i++)
-        {
-            slots.Add(null);
-        }
-
-        return slots;
+        int before = S.health;
+        S.health = Mathf.Min(S.healthCapacity, S.health + amount);
+        return S.health - before;
     }
 
     private static void EnsureInventory()
     {
-        if (Inventory == null || Inventory.Count != InventoryCapacity)
+        if (S.inventory == null || S.inventory.Count != S.inventoryCapacity)
         {
-            Inventory = CreateEmptyInventory(InventoryCapacity > 0 ? InventoryCapacity : DefaultInventoryCapacity);
-            InventoryCapacity = Inventory.Count;
+            S.inventory = PlayerState.CreateEmptyInventory(S.inventoryCapacity > 0 ? S.inventoryCapacity : DefaultInventoryCapacity);
+            S.inventoryCapacity = S.inventory.Count;
         }
     }
 
     private static void CompactInventory()
     {
         List<ItemDefinition> occupied = new List<ItemDefinition>();
-        for (int i = 0; i < InventoryCapacity; i++)
+        for (int i = 0; i < S.inventoryCapacity; i++)
         {
-            if (Inventory[i] != null)
+            if (S.inventory[i] != null)
             {
-                occupied.Add(Inventory[i]);
+                occupied.Add(S.inventory[i]);
             }
         }
 
-        for (int i = 0; i < InventoryCapacity; i++)
+        for (int i = 0; i < S.inventoryCapacity; i++)
         {
-            Inventory[i] = i < occupied.Count ? occupied[i] : null;
+            S.inventory[i] = i < occupied.Count ? occupied[i] : null;
         }
     }
 
     public static void MarkForOverworldDestroy(string id)
     {
-        Initialize();
-        if (string.IsNullOrEmpty(id) || OverworldDestroyList.Contains(id))
+        if (string.IsNullOrEmpty(id) || S.overworldDestroyList.Contains(id))
         {
             return;
         }
 
-        OverworldDestroyList.Add(id);
+        S.overworldDestroyList.Add(id);
     }
 
     public static void DefeatCyclops()
     {
-        Initialize();
-        IsCyclopsDefeated = true;
+        S.isCyclopsDefeated = true;
     }
 
     public static void UpgradetAttack(string tag)
     {
-        Attack += 1;
-        PowerupDestroy.Add(tag);
+        S.attack += 1;
+        S.powerupDestroy.Add(tag);
         Debug.Log("ADDED TAG: " + tag);
-        Debug.Log("PowerupDestroy: " + PowerupDestroy.Count);
+        Debug.Log("PowerupDestroy: " + S.powerupDestroy.Count);
     }
 
     public static void UpgradeDefense(string tag)
     {
-        DefenseCapacity += 1;
-        Defense = DefenseCapacity;
-        PowerupDestroy.Add(tag);
+        S.defenseCapacity += 1;
+        S.defense = S.defenseCapacity;
+        S.powerupDestroy.Add(tag);
         Debug.Log("ADDED TAG: " + tag);
-        Debug.Log("PowerupDestroy: " + PowerupDestroy.Count);
+        Debug.Log("PowerupDestroy: " + S.powerupDestroy.Count);
     }
 
     public static void UpgradeHealth(string tag)
     {
-        HealthCapacity += 1;
-        Health = HealthCapacity;
-        PowerupDestroy.Add(tag);
+        S.healthCapacity += 1;
+        S.health = S.healthCapacity;
+        S.powerupDestroy.Add(tag);
         Debug.Log("ADDED TAG: " + tag);
-        Debug.Log("PowerupDestroy: " + PowerupDestroy.Count);
+        Debug.Log("PowerupDestroy: " + S.powerupDestroy.Count);
     }
 
     public static bool IsTreasureChestOpened(string uniqueId)
     {
-        Initialize();
-        return !string.IsNullOrEmpty(uniqueId) && OpenedTreasureChests.Contains(uniqueId);
+        return !string.IsNullOrEmpty(uniqueId) && S.openedTreasureChests.Contains(uniqueId);
     }
 
     public static void OpenTreasureChest(string uniqueId)
     {
-        Initialize();
-        if (string.IsNullOrEmpty(uniqueId) || OpenedTreasureChests.Contains(uniqueId))
+        if (string.IsNullOrEmpty(uniqueId) || S.openedTreasureChests.Contains(uniqueId))
         {
             return;
         }
 
-        OpenedTreasureChests.Add(uniqueId);
+        S.openedTreasureChests.Add(uniqueId);
     }
 
     public static void PickUpWeapon(string weaponSOPath, int attack)
     {
-        Initialize();
         EnsureMeleeWeapons();
         Debug.Log("PickUpWeapon: " + weaponSOPath);
-        if (!string.IsNullOrEmpty(weaponSOPath) && !MeleeWeapons.Contains(weaponSOPath))
+        if (!string.IsNullOrEmpty(weaponSOPath) && !S.meleeWeapons.Contains(weaponSOPath))
         {
-            MeleeWeapons.Add(weaponSOPath);
+            S.meleeWeapons.Add(weaponSOPath);
         }
 
         EquipMeleeWeapon(weaponSOPath, attack);
@@ -300,62 +245,54 @@ public static class PlayerStats
 
     public static void EquipMeleeWeapon(string weaponName, int attack)
     {
-        Initialize();
         EnsureMeleeWeapons();
         if (string.IsNullOrEmpty(weaponName))
         {
             return;
         }
 
-        if (!MeleeWeapons.Contains(weaponName))
+        if (!S.meleeWeapons.Contains(weaponName))
         {
-            MeleeWeapons.Add(weaponName);
+            S.meleeWeapons.Add(weaponName);
         }
 
         Debug.Log("EquipMeleeWeapon: " + weaponName);
-        MeleeWeapon = weaponName;
-        Attack = attack;
+        S.meleeWeapon = weaponName;
+        S.attack = attack;
     }
 
     public static void ClearMeleeWeapon()
     {
-        Initialize();
         EnsureMeleeWeapons();
         // Persist unarmed primary (Fists) rather than a null equip state
-        if (!MeleeWeapons.Contains(MeleeController.UnarmedWeaponName))
-        {
-            MeleeWeapons.Insert(0, MeleeController.UnarmedWeaponName);
-        }
-
-        MeleeWeapon = MeleeController.UnarmedWeaponName;
-        Attack = 1;
+        S.meleeWeapon = MeleeController.UnarmedWeaponName;
+        S.attack = 1;
     }
 
     private static void EnsureMeleeWeapons()
     {
-        if (MeleeWeapons == null)
+        if (S.meleeWeapons == null)
         {
-            MeleeWeapons = new List<string>();
+            S.meleeWeapons = new List<string>();
         }
 
-        if (!MeleeWeapons.Contains(MeleeController.UnarmedWeaponName))
+        if (!S.meleeWeapons.Contains(MeleeController.UnarmedWeaponName))
         {
-            MeleeWeapons.Insert(0, MeleeController.UnarmedWeaponName);
+            S.meleeWeapons.Insert(0, MeleeController.UnarmedWeaponName);
         }
     }
 
     public static void EnsureMeleeWeaponsList()
     {
-        Initialize();
         EnsureMeleeWeapons();
     }
 
     public static void AcquireSecondaryWeapon(string weaponName)
     {
         Debug.Log("AcquireSecondaryWeapon: " + weaponName);
-        if (!SecondaryWeapons.Contains(weaponName))
+        if (!S.secondaryWeapons.Contains(weaponName))
         {
-            SecondaryWeapons.Add(weaponName);
+            S.secondaryWeapons.Add(weaponName);
         }
 
         EquipSecondaryWeapon(weaponName);
@@ -364,76 +301,71 @@ public static class PlayerStats
     public static void EquipSecondaryWeapon(string weaponName)
     {
         Debug.Log("EquipSecondaryWeapon: " + weaponName);
-        SecondaryWeapon = weaponName;
+        S.secondaryWeapon = weaponName;
     }
 
     public static int GetSecondaryWeaponAmmo(string weaponName)
     {
-        return SecondaryWeaponAmmo != null && SecondaryWeaponAmmo.TryGetValue(weaponName, out int ammo) ? ammo : 0;
+        AmmoEntry entry = FindAmmo(weaponName);
+        return entry != null ? entry.ammo : 0;
     }
 
     public static void InitializeSecondaryWeaponAmmo(string weaponName, int maxAmmo)
     {
-        if (SecondaryWeaponAmmo == null)
+        if (FindAmmo(weaponName) == null)
         {
-            SecondaryWeaponAmmo = new Dictionary<string, int>();
-        }
-
-        if (!SecondaryWeaponAmmo.ContainsKey(weaponName))
-        {
-            SecondaryWeaponAmmo[weaponName] = maxAmmo;
+            S.secondaryWeaponAmmo.Add(new AmmoEntry(weaponName, maxAmmo));
         }
     }
 
     public static void ConsumeSecondaryWeaponAmmo(string weaponName)
     {
-        if (SecondaryWeaponAmmo == null || !SecondaryWeaponAmmo.ContainsKey(weaponName))
+        AmmoEntry entry = FindAmmo(weaponName);
+        if (entry == null)
         {
             return;
         }
 
-        SecondaryWeaponAmmo[weaponName] = Mathf.Max(0, SecondaryWeaponAmmo[weaponName] - 1);
+        entry.ammo = Mathf.Max(0, entry.ammo - 1);
     }
 
     public static void AddSecondaryWeaponAmmo(string weaponName, int amount, int maxAmmo)
     {
-        Initialize();
-        if (SecondaryWeaponAmmo == null)
+        AmmoEntry entry = FindAmmo(weaponName);
+        if (entry == null)
         {
-            SecondaryWeaponAmmo = new Dictionary<string, int>();
+            entry = new AmmoEntry(weaponName, 0);
+            S.secondaryWeaponAmmo.Add(entry);
         }
 
-        if (!SecondaryWeaponAmmo.ContainsKey(weaponName))
+        entry.ammo = Mathf.Min(maxAmmo, entry.ammo + amount);
+    }
+
+    private static AmmoEntry FindAmmo(string weaponName)
+    {
+        foreach (AmmoEntry entry in S.secondaryWeaponAmmo)
         {
-            SecondaryWeaponAmmo[weaponName] = 0;
+            if (entry.weaponName == weaponName)
+            {
+                return entry;
+            }
         }
 
-        SecondaryWeaponAmmo[weaponName] = Mathf.Min(maxAmmo, SecondaryWeaponAmmo[weaponName] + amount);
+        return null;
     }
 
     public static void ApplyDamage(int amount)
     {
-        int newHealth = Health - amount;
-        if (newHealth < 0)
-        {
-            newHealth = 0;
-        }
-        Health = newHealth;
+        S.health = Mathf.Max(0, S.health - amount);
     }
 
     public static void SetHealth(int amount)
     {
-        Initialize();
-        Health = Mathf.Clamp(amount, 0, HealthCapacity);
-    }
-
-    public static void Reset()
-    {
-        Initialized = false;
+        S.health = Mathf.Clamp(amount, 0, S.healthCapacity);
     }
 
     public static void ResetHealthForContinue()
     {
-        Health = HealthCapacity;
+        S.health = S.healthCapacity;
     }
 }

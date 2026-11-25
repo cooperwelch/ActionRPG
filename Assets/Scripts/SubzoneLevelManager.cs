@@ -25,10 +25,7 @@ public class SubzoneLevelManager : MonoBehaviour
             OverworldSubzoneContainer.UseSubzoneLevelStartPosition = false;
 
             rigidBody = Player.GetComponent<Rigidbody2D>();
-            rigidBody.transform.position = new Vector3(
-                OverworldSubzoneContainer.SubzoneLevelStartPosition.Item1,
-                OverworldSubzoneContainer.SubzoneLevelStartPosition.Item2
-            );
+            rigidBody.transform.position = OverworldSubzoneContainer.SubzoneLevelStartPosition;
 
             movement.SetDirection(OverworldSubzoneContainer.SubzoneLevelStartDirection);
         }

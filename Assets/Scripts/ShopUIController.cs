@@ -76,7 +76,6 @@ public class ShopUIController : MonoBehaviour
             return;
         }
 
-        PlayerStats.Initialize();
         selectedIndex = 0;
         confirmOpen = false;
         CloseMessageImmediate();
