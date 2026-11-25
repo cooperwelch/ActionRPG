@@ -17,11 +17,33 @@ public class GameManager : MonoBehaviour
     public bool IsGameOver => _isGameOver;
     private string _continueLevelName;
 
+    // Lives in Assets/Resources so it can be spawned from code.
+    private const string PrefabResourcePath = "GameManager";
+
+    // Runs once when play starts, before the first scene's objects wake up, so every scene
+    // (including subzones played directly in the editor) has a GameManager. Any copy placed
+    // in a scene (Title, Overworld) becomes a duplicate and removes itself in Awake.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void EnsureInstance()
+    {
+        if (sharedInstance != null) return;
+
+        GameObject prefab = Resources.Load<GameObject>(PrefabResourcePath);
+        if (prefab == null)
+        {
+            Debug.LogError("GameManager: prefab not found at Resources/" + PrefabResourcePath);
+            return;
+        }
+
+        GameObject instance = Instantiate(prefab);
+        instance.name = prefab.name;
+    }
+
     private void Awake()
     {
         if (sharedInstance != null && sharedInstance != this)
         {
-            Destroy(this);
+            Destroy(gameObject);
             return;
         } else
         {
